@@ -109,7 +109,7 @@ window.onload = async () => {
     showBibleVerse(data.book, data.chapter, data.verse);
   }
   //handle footer
-  if(window.innerHeight>=document.body.offsetHeight){
+  if(window.outerHeight>=document.body.offsetHeight){
     footer.setAttribute("style",`position:absolute;top:${window.innerHeight-50}px`)
   }else{
     footer.setAttribute("style",`margin-top:10%`)
