@@ -87,7 +87,8 @@ function readQuery() {
 
 async function readBiBle() {
   
-  let data = await fetch("bible_data/PT/biblia.json");
+  //let data = await fetch("bible_data/PT/biblia.json");
+  let data = await fetch("https://raw.githubusercontent.com/thiagobodruk/bible/master/json/pt_aa.json");
   return await data.json();
 }
 
