@@ -93,6 +93,7 @@ async function readBiBle() {
 }
 
 window.onload = async () => {
+  let footer=document.getElementById("footer")
   bible_data = await readBiBle();
   let book_index = getRndInteger(0, bible_data.length);
   let chapter_index = getRndInteger(0, bible_data[book_index].chapters.length);
@@ -106,5 +107,11 @@ window.onload = async () => {
   } else {
     let data = readQuery();
     showBibleVerse(data.book, data.chapter, data.verse);
+  }
+  //handle footer
+  if(window.innerHeight>=document.body.offsetHeight){
+    footer.setAttribute("style",`position:absolute;top:${window.innerHeight-50}px`)
+  }else{
+    footer.setAttribute("style",`margin-top:10%`)
   }
 };
