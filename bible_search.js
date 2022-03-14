@@ -89,6 +89,7 @@ window.onload = async () => {
   );
   if (readQuery() == "") {
     showBibleVerse(book_index, chapter_index, verse_index);
+    //window.location.search=`?book=${book_index+1};chapter=${chapter_index+1};verse=${verse_index+1}`
   } else {
     let data = readQuery();
     showBibleVerse(data.book, data.chapter, data.verse);
