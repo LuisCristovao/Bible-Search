@@ -114,7 +114,7 @@ function menu() {
     book_menu: () => {
       let book_index = parseInt(window.location.search.split("book_menu;")[1]) - 1;
       let book = bible_data[book_index];
-      let html = `<h2>${book.name}</h2>`;
+      let html = `<h1>${book.name}</h1>`;
       book.chapters.forEach((chapter, chapter_index) => {
         html += `
         <a href="?book=${book_index + 1};chapter=${chapter_index + 1}" style="font-size:x-large;padding:3px">${
@@ -145,14 +145,14 @@ function Search() {
     let abbrev=removeAccents(book.abbrev).toLowerCase()
     search_query.split(" ").forEach((word)=>{
       if (Match(name,word) || Match(word,abbrev)){
-        matches.push({"book_index":book_index,"book_name":name,"abbrev":abbrev})
+        matches.push({"book_index":book_index,"book_name":book.name,"abbrev":book.abbrev})
       }
     })
   })
   let html=""
   matches.forEach((match)=>{
     html+=`
-    <a href="?book=${match.book_index+1}"><h1>${match.book_name}</h1></a>
+    <a href="?menu=book_menu;${match.book_index+1}"><h1>${match.book_name}</h1></a>
     `
   })
   writeHtml(html)
