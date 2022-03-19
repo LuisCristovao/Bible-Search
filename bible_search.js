@@ -117,7 +117,7 @@ function menu() {
       let html = `<h2>${book.name}</h2>`;
       book.chapters.forEach((chapter, chapter_index) => {
         html += `
-        <a href="?book=${book_index + 1};chapter=${chapter_index + 1}">${
+        <a href="?book=${book_index + 1};chapter=${chapter_index + 1}" style="font-size:x-large;padding:3px">${
           chapter_index + 1
         }</a>
         `;
@@ -130,8 +130,33 @@ function menu() {
 
 //-----
 //Search functions-----------
+function Match(w1,w2){
+  return w1.includes(w2)
+}
+function removeAccents(str){
+  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+}
 function Search() {
-  alert("Search page");
+  let search_query = removeAccents(decodeURI(window.location.search.split("search=")[1])).toLowerCase()
+  document.getElementById("search").value=decodeURI(window.location.search.split("search=")[1])
+  let matches=[]
+  bible_data.forEach((book,book_index)=>{
+    let name=removeAccents(book.name).toLowerCase()
+    let abbrev=removeAccents(book.abbrev).toLowerCase()
+    search_query.split(" ").forEach((word)=>{
+      if (Match(name,word) || Match(word,abbrev)){
+        matches.push({"book_index":book_index,"book_name":name,"abbrev":abbrev})
+      }
+    })
+  })
+  let html=""
+  matches.forEach((match)=>{
+    html+=`
+    <a href="?book=${match.book_index+1}"><h1>${match.book_name}</h1></a>
+    `
+  })
+  writeHtml(html)
+  console.log(matches)
 }
 function startSearch(e) {
   if (e.key === "Enter") {
@@ -198,22 +223,5 @@ window.onload = async () => {
   } else {
     footer.setAttribute("style", `margin-top:10%`);
   }
-  /* let footer = document.getElementById("footer");
-  let search=document.getElementById("search");
-  search.addEventListener("keydown",startSearch)
   
-  let book_index = getRndInteger(0, bible_data.length);
-  let chapter_index = getRndInteger(0, bible_data[book_index].chapters.length);
-  let verse_index = getRndInteger(
-    0,
-    bible_data[book_index].chapters[chapter_index].length
-  );
-  if (readQuery() == "") {
-    showBibleVerse(book_index, chapter_index, verse_index);
-    //window.location.search=`?book=${book_index+1};chapter=${chapter_index+1};verse=${verse_index+1}`
-  } else {
-    let data = readQuery();
-    showBibleVerse(data.book, data.chapter, data.verse);
-  }
-   */
 };
