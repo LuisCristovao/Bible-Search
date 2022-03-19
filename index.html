@@ -1,20 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Bible Search</title>
-</head>
-<body>
-    <p>Search:</p>
-    <input type="text" id="search">
-    <div id="content">
-
-    </div>    
-</body>
-<div id="footer">
-    <p>Powerd by <a href="https://github.com/thiagobodruk/bible">thiagobodruk/bible</a></p>
-</div>
-<script src="bible_search.js"></script>
+    <link rel="stylesheet" href="bible_search.css">
+  </head>
+  <body>
+    <table>
+      <tbody>
+        <tr>
+          <td>
+              <input type="text" id="search" placeholder="Search" />
+          </td>
+          <!-- <td>
+              <h1 id="menu" onclick="menu('start menu')">Menu</h1>
+          </td> -->
+        </tr>
+      </tbody>
+    </table>
+    <div id="content"></div>
+  </body>
+  <div id="footer">
+    <p>
+      Powerd by
+      <a href="https://github.com/thiagobodruk/bible">thiagobodruk/bible</a>
+    </p>
+  </div>
+  <script src="bible_search.js"></script>
 </html>

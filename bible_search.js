@@ -5,14 +5,20 @@ function getRndInteger(min, max) {
 function writeHtml(html) {
   document.getElementById("content").innerHTML = html;
 }
-function bookHtml(book_index,book){
-  return `<a href="?book=${book_index + 1}"><h1>Livro ${book_index + 1} ${book.name}</h1></a>`;
+function bookHtml(book_index, book) {
+  return `<a href="?book=${book_index + 1}"><h1>Livro ${book_index + 1} ${
+    book.name
+  }</h1></a>`;
 }
-function chapterHtml(book_index,chapter_index){
-  return `<a href="?book=${book_index + 1};chapter=${chapter_index + 1}"><h2>Capítulo ${chapter_index + 1}</h2></a>`;
+function chapterHtml(book_index, chapter_index) {
+  return `<a href="?book=${book_index + 1};chapter=${
+    chapter_index + 1
+  }"><h2>Capítulo ${chapter_index + 1}</h2></a>`;
 }
-function verseHtml(book_index,chapter_index,verse_index,verse){
-  return `<p>${verse_index + 1}: ${verse} &nbsp;&nbsp;<a href="?book=${book_index + 1};chapter=${chapter_index + 1};verse=${verse_index + 1}">></a></p>`;
+function verseHtml(book_index, chapter_index, verse_index, verse) {
+  return `<p>${verse_index + 1}: ${verse} &nbsp;&nbsp;<a href="?book=${
+    book_index + 1
+  };chapter=${chapter_index + 1};verse=${verse_index + 1}">></a></p>`;
 }
 function showBibleVerse(book_index = -1, chapter_index = -1, verse_index = -1) {
   let html = "";
@@ -21,26 +27,26 @@ function showBibleVerse(book_index = -1, chapter_index = -1, verse_index = -1) {
     return true;
   } else {
     var book = bible_data[book_index];
-    html += bookHtml(book_index,book)
+    html += bookHtml(book_index, book);
   }
   if (chapter_index != -1) {
     var chapter = book.chapters[chapter_index];
     if (verse_index != -1) {
       let verse = chapter[verse_index];
-      html += chapterHtml(book_index,chapter_index)
-      html += verseHtml(book_index,chapter_index,verse_index,verse);
+      html += chapterHtml(book_index, chapter_index);
+      html += verseHtml(book_index, chapter_index, verse_index, verse);
     } else {
-      html += chapterHtml(book_index,chapter_index);
+      html += chapterHtml(book_index, chapter_index);
       chapter.forEach((verse, index) => {
-        html += verseHtml(book_index,chapter_index,index,verse);
+        html += verseHtml(book_index, chapter_index, index, verse);
       });
     }
   } else {
     book.chapters.forEach((chapter, index) => {
-      let chapter_index=index
-      html += chapterHtml(book_index,chapter_index)
+      let chapter_index = index;
+      html += chapterHtml(book_index, chapter_index);
       chapter.forEach((verse, index) => {
-        html += verseHtml(book_index,chapter_index,index,verse)
+        html += verseHtml(book_index, chapter_index, index, verse);
       });
     });
   }
@@ -49,13 +55,13 @@ function showBibleVerse(book_index = -1, chapter_index = -1, verse_index = -1) {
 function showAllBible() {
   let html = "";
   bible_data.forEach((book, index) => {
-    let book_index=index
-    html += bookHtml(book_index,book)
+    let book_index = index;
+    html += bookHtml(book_index, book);
     book.chapters.forEach((chapter, index) => {
-      let chapter_index=index;
-      html += chapterHtml(book_index,chapter_index);
+      let chapter_index = index;
+      html += chapterHtml(book_index, chapter_index);
       chapter.forEach((verse, index) => {
-        html += verseHtml(book_index,chapter_index,index,verse)
+        html += verseHtml(book_index, chapter_index, index, verse);
       });
     });
   });
@@ -84,16 +90,45 @@ function readQuery() {
   }
   return { book: book - 1, chapter: chapter - 1, verse: verse - 1 };
 }
-
-async function readBiBle() {
-  
-  //let data = await fetch("bible_data/PT/biblia.json");
-  let data = await fetch("https://raw.githubusercontent.com/thiagobodruk/bible/master/json/pt_aa.json");
-  return await data.json();
+//Menu function -----
+function menu(state) {
+  let menu_states = {
+    "start menu": () => {
+      let html = `
+      <h1><a>Home</a></h1>
+      <h1><a>Books</a></h1>
+      `;
+      return html;
+    },
+  };
+  writeHtml(menu_states[state]());
 }
 
+//-----
+//Search functions-----------
+function Search(query) {
+
+}
+function startSearch(e) {
+  if (e.key === "Enter") {
+    Search(document.getElementById("search").value)
+    //alert("Enter is pressed!");
+  }
+}
+
+//-----
+async function readBiBle() {
+  //let data = await fetch("bible_data/PT/biblia.json");
+  let data = await fetch(
+    "https://raw.githubusercontent.com/thiagobodruk/bible/master/json/pt_aa.json"
+  );
+  return await data.json();
+}
+// Main -----
 window.onload = async () => {
-  let footer=document.getElementById("footer")
+  let footer = document.getElementById("footer");
+  let search=document.getElementById("search");
+  search.addEventListener("keydown",startSearch)
   bible_data = await readBiBle();
   let book_index = getRndInteger(0, bible_data.length);
   let chapter_index = getRndInteger(0, bible_data[book_index].chapters.length);
@@ -109,9 +144,12 @@ window.onload = async () => {
     showBibleVerse(data.book, data.chapter, data.verse);
   }
   //handle footer
-  if(window.outerHeight>=document.body.offsetHeight){
-    footer.setAttribute("style",`position:absolute;top:${window.innerHeight-50}px`)
-  }else{
-    footer.setAttribute("style",`margin-top:10%`)
+  if (window.outerHeight >= document.body.offsetHeight) {
+    footer.setAttribute(
+      "style",
+      `position:absolute;top:${window.innerHeight - 50}px`
+    );
+  } else {
+    footer.setAttribute("style", `margin-top:10%`);
   }
 };
