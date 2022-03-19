@@ -91,32 +91,75 @@ function readQuery() {
   return { book: book - 1, chapter: chapter - 1, verse: verse - 1 };
 }
 //Menu function -----
-function menu(state) {
+function menu() {
+  let state = window.location.search.split("menu=")[1].split(";")[0];
   let menu_states = {
-    "start menu": () => {
+    start_menu: () => {
       let html = `
-      <h1><a>Home</a></h1>
-      <h1><a>Books</a></h1>
+      <a href="?" ><h1 class="menu_class">Home</h1></a>
+      <a href="?menu=books_menu" ><h1 class="menu_class">Books</h1></a>
       `;
       return html;
     },
+    books_menu: () => {
+      let html = ``;
+
+      bible_data.forEach((book, book_index) => {
+        html += `
+        <a href="?menu=book_menu;${book_index + 1}"><h2>${book.name}</h2></a>
+        `;
+      });
+      return html;
+    },
+    book_menu: () => {
+      let book_index = parseInt(window.location.search.split("book_menu;")[1]) - 1;
+      let book = bible_data[book_index];
+      let html = `<h2>${book.name}</h2>`;
+      book.chapters.forEach((chapter, chapter_index) => {
+        html += `
+        <a href="?book=${book_index + 1};chapter=${chapter_index + 1}">${
+          chapter_index + 1
+        }</a>
+        `;
+      });
+      return html;
+    }
   };
   writeHtml(menu_states[state]());
 }
 
 //-----
 //Search functions-----------
-function Search(query) {
-
+function Search() {
+  alert("Search page");
 }
 function startSearch(e) {
   if (e.key === "Enter") {
-    Search(document.getElementById("search").value)
+    let search = document.getElementById("search").value;
+    window.location.search = `?search=${search}`;
     //alert("Enter is pressed!");
   }
 }
 
-//-----
+//Pages-----
+function selectBiBlePart() {
+  let data = readQuery();
+  showBibleVerse(data.book, data.chapter, data.verse);
+}
+
+async function createHome() {
+  bible_data = await readBiBle();
+  let book_index = getRndInteger(0, bible_data.length);
+  let chapter_index = getRndInteger(0, bible_data[book_index].chapters.length);
+  let verse_index = getRndInteger(
+    0,
+    bible_data[book_index].chapters[chapter_index].length
+  );
+
+  showBibleVerse(book_index, chapter_index, verse_index);
+  //window.location.search=`?book=${book_index+1};chapter=${chapter_index+1};verse=${verse_index+1}`
+}
+//----------
 async function readBiBle() {
   //let data = await fetch("bible_data/PT/biblia.json");
   let data = await fetch(
@@ -125,11 +168,40 @@ async function readBiBle() {
   return await data.json();
 }
 // Main -----
+const pages = {
+  "": () => {
+    createHome();
+  },
+  "?search": () => {
+    Search();
+  },
+  "?book": () => {
+    selectBiBlePart();
+  },
+  "?menu": () => {
+    menu("start menu");
+  },
+};
+
 window.onload = async () => {
-  let footer = document.getElementById("footer");
+  bible_data = await readBiBle();
+  let page = window.location.search.split("=")[0];
+  pages[page]();
+  let search = document.getElementById("search");
+  search.addEventListener("keydown", startSearch);
+  //handle footer
+  if (window.outerHeight >= document.body.offsetHeight) {
+    footer.setAttribute(
+      "style",
+      `position:absolute;top:${window.innerHeight - 50}px`
+    );
+  } else {
+    footer.setAttribute("style", `margin-top:10%`);
+  }
+  /* let footer = document.getElementById("footer");
   let search=document.getElementById("search");
   search.addEventListener("keydown",startSearch)
-  bible_data = await readBiBle();
+  
   let book_index = getRndInteger(0, bible_data.length);
   let chapter_index = getRndInteger(0, bible_data[book_index].chapters.length);
   let verse_index = getRndInteger(
@@ -143,13 +215,5 @@ window.onload = async () => {
     let data = readQuery();
     showBibleVerse(data.book, data.chapter, data.verse);
   }
-  //handle footer
-  if (window.outerHeight >= document.body.offsetHeight) {
-    footer.setAttribute(
-      "style",
-      `position:absolute;top:${window.innerHeight - 50}px`
-    );
-  } else {
-    footer.setAttribute("style", `margin-top:10%`);
-  }
+   */
 };

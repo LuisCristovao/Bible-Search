@@ -3,7 +3,6 @@
     margin-right: 10px;
 
 }
-#menu{
-    text-decoration: underline;
-    color: dodgerblue;
+.menu_class{
+    margin-left: 125px;
 }
