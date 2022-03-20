@@ -143,19 +143,34 @@ function Search() {
   bible_data.forEach((book,book_index)=>{
     let name=removeAccents(book.name).toLowerCase()
     let abbrev=removeAccents(book.abbrev).toLowerCase()
-    search_query.split(" ").forEach((word)=>{
-      if (Match(name,word) || Match(word,abbrev)){
-        matches.push({"book_index":book_index,"book_name":book.name,"abbrev":book.abbrev})
-      }
+    book.chapters.forEach((chapter,chapter_index)=>{
+
+      //search_query.split(" ").forEach((word)=>{
+        /* if (Match(name,word) || Match(word,abbrev)){
+          matches.push({"book_index":book_index,"book_name":book.name,"abbrev":book.abbrev})
+        } */
+        chapter.forEach((verse,verse_index)=>{
+          if (Match(removeAccents(verse).toLowerCase(),search_query)) {
+            matches.push(
+              {"book_index":book_index,
+              "book_name":book.name,
+              "abbrev":book.abbrev,
+              "chapter_index":chapter_index,
+              "verse_index":verse_index,
+              "verse":verse
+            })
+          } 
+        })
+      //})
     })
   })
-  let html=""
+  /* let html=""
   matches.forEach((match)=>{
     html+=`
     <a href="?menu=book_menu;${match.book_index+1}"><h1>${match.book_name}</h1></a>
     `
-  })
-  writeHtml(html)
+  }) */
+  //writeHtml(html)
   console.log(matches)
 }
 function startSearch(e) {
