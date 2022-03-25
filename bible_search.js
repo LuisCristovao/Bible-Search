@@ -177,8 +177,18 @@ function createSearchSugestions(matches){
   html=""
   new_testement=matches.filter(match=>match.book_index>=40)
   old_testement=matches.filter(match=>match.book_index<40)
-  console.log([... new Set(new_testement.map(book=>{return book.book_name}))])
-  console.log([... new Set(old_testement.map(book=>{return book.book_name}))])
+  books_from_new_testement=[... new Set(new_testement.map(book=>{return book.book_name}))]
+  books_from_old_testement=[... new Set(old_testement.map(book=>{return book.book_name}))]
+  books_from_new_testement_array=[]
+  books_from_old_testement_array=[]
+  books_from_new_testement.forEach(book_name=>{
+    books_from_new_testement_array.push({"book_name":book_name,"data":new_testement.filter(book=>book.book_name==book_name)})
+  })
+  books_from_old_testement.forEach(book_name=>{
+    books_from_old_testement_array.push({"book_name":book_name,"data":old_testement.filter(book=>book.book_name==book_name)})
+  })
+  console.log(books_from_new_testement_array)
+  console.log(books_from_old_testement_array)
 
 
 }
