@@ -175,8 +175,8 @@ function Search() {
 }
 function createSearchSugestions(matches){
   html=""
-  new_testement=matches.filter(match=>match.book_index>=40)
-  old_testement=matches.filter(match=>match.book_index<40)
+  new_testement=matches.filter(match=>match.book_index>=39)
+  old_testement=matches.filter(match=>match.book_index<39)
   books_from_new_testement=[... new Set(new_testement.map(book=>{return book.book_name}))]
   books_from_old_testement=[... new Set(old_testement.map(book=>{return book.book_name}))]
   books_from_new_testement_array=[]
@@ -219,6 +219,16 @@ async function createHome() {
   //window.location.search=`?book=${book_index+1};chapter=${chapter_index+1};verse=${verse_index+1}`
 }
 //----------
+function showChildren(element) {
+  let div=element.parentElement
+  
+  let child_div=div.children[1]
+  if(child_div.style.display=="none"){
+    child_div.style.display="block"
+  }else{
+    child_div.style.display="none"
+  } 
+}
 async function readBiBle() {
   //let data = await fetch("bible_data/PT/biblia.json");
   let data = await fetch(

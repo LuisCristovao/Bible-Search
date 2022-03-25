@@ -13,6 +13,15 @@
     
 }*/
 
-.hierarchic_class{
+/*.partial-window {
     text-decoration: underline;
-}
+    height: 0px;
+    visibility: collapse;
+    cursor: pointer;
+    transition: ease 0.5s;
+  }
+  .window-full {
+    height: 100%;
+    transition: ease 2s;
+    
+  }*/
