@@ -189,6 +189,9 @@ function createSearchSugestions(matches){
   })
   console.log(books_from_new_testement_array)
   console.log(books_from_old_testement_array)
+  /*html=`<h1 style>Novo Testamento</h1>`
+  books_from_new_testement_array.forEach(b)
+  writeHtml(html)*/
 
 
 }
@@ -220,6 +223,11 @@ async function createHome() {
 }
 //----------
 function showChildren(element) {
+  if(element.innerText.includes("▼")){
+    element.innerText=element.innerText.replace("▼","▲")
+  }else{
+    element.innerText=element.innerText.replace("▲","▼")
+  }
   let div=element.parentElement
   
   let child_div=div.children[1]
