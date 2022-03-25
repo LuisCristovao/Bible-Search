@@ -171,7 +171,16 @@ function Search() {
     `
   }) */
   //writeHtml(html)
-  console.log(matches)
+  createSearchSugestions(matches)
+}
+function createSearchSugestions(matches){
+  html=""
+  new_testement=matches.filter(match=>match.book_index>=40)
+  old_testement=matches.filter(match=>match.book_index<40)
+  console.log([... new Set(new_testement.map(book=>{return book.book_name}))])
+  console.log([... new Set(old_testement.map(book=>{return book.book_name}))])
+
+
 }
 function startSearch(e) {
   if (e.key === "Enter") {
