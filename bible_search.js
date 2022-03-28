@@ -6,9 +6,9 @@ function writeHtml(html) {
   document.getElementById("content").innerHTML = html;
 }
 function bookHtml(book_index, book) {
-  return `<a href="?book=${book_index + 1}"><h1>Livro ${book_index + 1} ${
-    book.name
-  }</h1></a>`;
+  return `<a href="?menu=book_menu;${book_index + 1}"><h1>Livro ${
+    book_index + 1
+  } ${book.name}</h1></a>`;
 }
 function chapterHtml(book_index, chapter_index) {
   return `<a href="?book=${book_index + 1};chapter=${
@@ -112,58 +112,69 @@ function menu() {
       return html;
     },
     book_menu: () => {
-      let book_index = parseInt(window.location.search.split("book_menu;")[1]) - 1;
+      let book_index =
+        parseInt(window.location.search.split("book_menu;")[1]) - 1;
       let book = bible_data[book_index];
       let html = `<h1>${book.name}</h1>`;
       book.chapters.forEach((chapter, chapter_index) => {
         html += `
-        <a href="?book=${book_index + 1};chapter=${chapter_index + 1}" style="font-size:x-large;padding:3px">${
+        <a href="?book=${book_index + 1};chapter=${
           chapter_index + 1
-        }</a>
+        }" style="font-size:x-large;padding:3px">${chapter_index + 1}</a>
         `;
       });
       return html;
-    }
+    },
   };
   writeHtml(menu_states[state]());
 }
 
 //-----
 //Search functions-----------
-function Match(w1,w2){
-  return w1.includes(w2)
+function Match(w1, w2) {
+  return w1.includes(w2);
 }
-function removeAccents(str){
-  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+function removeAccents(str) {
+  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 }
 function Search() {
-  let search_query = removeAccents(decodeURI(window.location.search.split("search=")[1])).toLowerCase()
-  document.getElementById("search").value=decodeURI(window.location.search.split("search=")[1])
-  let matches=[]
-  bible_data.forEach((book,book_index)=>{
-    let name=removeAccents(book.name).toLowerCase()
-    let abbrev=removeAccents(book.abbrev).toLowerCase()
-    book.chapters.forEach((chapter,chapter_index)=>{
-
-      //search_query.split(" ").forEach((word)=>{
-        /* if (Match(name,word) || Match(word,abbrev)){
-          matches.push({"book_index":book_index,"book_name":book.name,"abbrev":book.abbrev})
-        } */
-        chapter.forEach((verse,verse_index)=>{
-          if (Match(removeAccents(verse).toLowerCase(),search_query)) {
-            matches.push(
-              {"book_index":book_index,
-              "book_name":book.name,
-              "abbrev":book.abbrev,
-              "chapter_index":chapter_index,
-              "verse_index":verse_index,
-              "verse":verse
-            })
-          } 
+  let search_query = removeAccents(
+    decodeURI(window.location.search.split("search=")[1])
+  ).toLowerCase();
+  document.getElementById("search").value = decodeURI(
+    window.location.search.split("search=")[1]
+  );
+  let matches = [];
+  book_matches = [];
+  bible_data.forEach((book, book_index) => {
+    let name = removeAccents(book.name).toLowerCase();
+    let abbrev = removeAccents(book.abbrev).toLowerCase();
+    book.chapters.forEach((chapter, chapter_index) => {
+      search_query.split(" ").forEach((word) => {
+        if (Match(name, word) || Match(word, abbrev)) {
+          book_matches.push({
+            book_index: book_index,
+            book_name: book.name,
+            abbrev: book.abbrev,
+          });
+        }
+      });
+      chapter.forEach((verse, verse_index) => {
+        search_query.split(" ").forEach((word) => {
+          if (Match(removeAccents(verse).toLowerCase(), word)) {
+            matches.push({
+              book_index: book_index,
+              book_name: book.name,
+              abbrev: book.abbrev,
+              chapter_index: chapter_index,
+              verse_index: verse_index,
+              verse: verse,
+            });
+          }
         })
-      //})
-    })
-  })
+      });
+    });
+  });
   /* let html=""
   matches.forEach((match)=>{
     html+=`
@@ -171,92 +182,81 @@ function Search() {
     `
   }) */
   //writeHtml(html)
-  createSearchSugestions(matches)
+  createSearchSugestions(matches, book_matches);
 }
-function createSearchSugestions(matches){
-  let html=""
-  new_testement=matches.filter(match=>match.book_index>=39)
-  old_testement=matches.filter(match=>match.book_index<39)
-  books_from_new_testement=[... new Set(new_testement.map(book=>{return book.book_name}))]
-  books_from_old_testement=[... new Set(old_testement.map(book=>{return book.book_name}))]
-  books_from_new_testement_array=[]
-  books_from_old_testement_array=[]
-  books_from_new_testement.forEach(book_name=>{
-    books_from_new_testement_array.push({"book_name":book_name,"data":new_testement.filter(book=>book.book_name==book_name)})
-  })
-  books_from_old_testement.forEach(book_name=>{
-    books_from_old_testement_array.push({"book_name":book_name,"data":old_testement.filter(book=>book.book_name==book_name)})
-  })
-  console.log(books_from_new_testement_array)
-  console.log(books_from_old_testement_array)
-
-  //new testement
-  html+="<div>"
-  html+=`<h1 style="text-decoration:underline;cursor:pointer" onclick="showChildren(this)">Novo Testamento (${books_from_new_testement_array.length}) &#x25BC;</h1>`
-  html+=`<div style="display: none;">`
-  books_from_new_testement_array.forEach(book_obj=>{
-    html+=`<div>`
-    html+=`
+function createSearchSugestionsHtml(title,array){
+  let html = "<div>";
+  html += `<h1 style="text-decoration:underline;cursor:pointer" onclick="showChildren(this)">${title} (${array.length}) &#x25BC;</h1>`;
+  html += `<div style="display: none;">`;
+  array.forEach((book_obj) => {
+    html += `<div>`;
+    html += `
     <h2 style="text-decoration:underline;cursor:pointer" onclick="showChildren(this)">
     ${book_obj.book_name} (${book_obj.data.length}) &#x25BC;
     </h2>
     <div style="display: none;">
-    `
-    chapters=book_obj.data
-    chapters.forEach(chapter_obj=>{
-      let book_index=chapter_obj.book_index
-      let chapter_index=chapter_obj.chapter_index
-      let verse_index=chapter_obj.verse_index
-      let verse=chapter_obj.verse
+    `;
+    chapters = book_obj.data;
+    chapters.forEach((chapter_obj) => {
+      let book_index = chapter_obj.book_index;
+      let chapter_index = chapter_obj.chapter_index;
+      let verse_index = chapter_obj.verse_index;
+      let verse = chapter_obj.verse;
       //html+=chapterHtml(book_index,chapter_index)
-      html+=verseHtml(book_index,chapter_index,verse_index,verse) 
-    })
-    html+=`</div>`
-    html+=`</div>`
-    
-  })
-  html+=`</div></div>`
+      html += verseHtml(book_index, chapter_index, verse_index, verse);
+    });
+    html += `</div>`;
+    html += `</div>`;
+  });
+  html += `</div></div>`;
+  return html
+}
+function createSearchSugestions(matches, book_matches,best_matches) {
+  let html = "";
+  new_testement = matches.filter((match) => match.book_index >= 39);
+  old_testement = matches.filter((match) => match.book_index < 39);
+  books_from_new_testement = [
+    ...new Set(
+      new_testement.map((book) => {
+        return book.book_name;
+      })
+    ),
+  ];
+  books_from_old_testement = [
+    ...new Set(
+      old_testement.map((book) => {
+        return book.book_name;
+      })
+    ),
+  ];
+  books_from_new_testement_array = [];
+  books_from_old_testement_array = [];
+  books_from_new_testement.forEach((book_name) => {
+    books_from_new_testement_array.push({
+      book_name: book_name,
+      data: new_testement.filter((book) => book.book_name == book_name),
+    });
+  });
+  books_from_old_testement.forEach((book_name) => {
+    books_from_old_testement_array.push({
+      book_name: book_name,
+      data: old_testement.filter((book) => book.book_name == book_name),
+    });
+  });
+  console.log(books_from_new_testement_array);
+  console.log(books_from_old_testement_array);
+
+  //Best search------ 
+
+  //books----
+  //html+=createSearchSugestionsHtml("Livros",book_matches)
+  //new testement
+  html+=createSearchSugestionsHtml("Novo Testamento",books_from_new_testement_array)
 
   // old testement html----------------
-  html+="<div>"
-  html+=`<h1 style="text-decoration:underline;cursor:pointer" onclick="showChildren(this)">Antigo Testamento (${books_from_old_testement_array.length}) &#x25BC;</h1>`
-  html+=`<div style="display: none;">`
-  books_from_old_testement_array.forEach(book_obj=>{
-    html+=`<div>`
-    html+=`
-    <h2 style="text-decoration:underline;cursor:pointer" onclick="showChildren(this)">
-    ${book_obj.book_name} (${book_obj.data.length}) &#x25BC;
-    </h2>
-    <div style="display: none;">
-    `
-    chapters=book_obj.data
-    chapters.forEach(chapter_obj=>{
-      let book_index=chapter_obj.book_index
-      let chapter_index=chapter_obj.chapter_index
-      let verse_index=chapter_obj.verse_index
-      let verse=chapter_obj.verse
-      //html+=chapterHtml(book_index,chapter_index)
-      html+=verseHtml(book_index,chapter_index,verse_index,verse) 
-    })
-    html+=`</div>`
-    html+=`</div>`
-    
-  })
-  html+=`</div></div>`
+  html+=createSearchSugestionsHtml("Antigo Testamento",books_from_old_testement_array)
 
-
-
-
-
-
-
-
-
-
-
-  writeHtml(html)
-
-
+  writeHtml(html);
 }
 function startSearch(e) {
   if (e.key === "Enter") {
@@ -266,20 +266,19 @@ function startSearch(e) {
   }
 }
 function showChildren(element) {
-  if(element.innerText.includes("▼")){
-    element.innerText=element.innerText.replace("▼","▲")
-  }else{
-    element.innerText=element.innerText.replace("▲","▼")
+  if (element.innerText.includes("▼")) {
+    element.innerText = element.innerText.replace("▼", "▲");
+  } else {
+    element.innerText = element.innerText.replace("▲", "▼");
   }
-  let div=element.parentElement
-  
-  let child_div=div.children[1]
-  if(child_div.style.display=="none"){
-    child_div.style.display="block"
-  }else{
-    child_div.style.display="none"
-  }
+  let div = element.parentElement;
 
+  let child_div = div.children[1];
+  if (child_div.style.display == "none") {
+    child_div.style.display = "block";
+  } else {
+    child_div.style.display = "none";
+  }
 }
 //Pages-----
 function selectBiBlePart() {
@@ -339,5 +338,4 @@ window.onload = async () => {
   } else {
     footer.setAttribute("style", `margin-top:10%`);
   }
-  
 };
