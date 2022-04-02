@@ -132,7 +132,9 @@ function menu() {
 //-----
 //Search functions-----------
 function Match(w1, w2) {
-  return w1.includes(w2);
+  let w11=removeAccents(w1).toLowerCase()
+  let w21=removeAccents(w2).toLowerCase()
+  return w11.includes(w21);
 }
 function removeAccents(str) {
   return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -162,27 +164,29 @@ function Search() {
       });
       chapter.forEach((verse, verse_index) => {
         tmp_match = {};
-        search_query.split(" ").forEach((word, word_index) => {
-          if (Match(removeAccents(verse).toLowerCase(), word)) {
-            if (word_index > 0 & Object.keys(tmp_match).length > 0) {
-              let score=tmp_match.match_score 
-              score=score+1
-              tmp_match.match_score=score
+        verse.split(" ").forEach((verse_word) => {
+          search_query.split(" ").forEach((word, word_index) => {
+            if (Match(verse_word, word)) {
+              if ((Object.keys(tmp_match).length > 0)) {
+                let score = tmp_match.match_score;
+                score = score + 1;
+                tmp_match.match_score = score;
+              } else {
+                tmp_match = {
+                  book_index: book_index,
+                  book_name: book.name,
+                  abbrev: book.abbrev,
+                  chapter_index: chapter_index,
+                  verse_index: verse_index,
+                  verse: verse,
+                  match_score: 1,
+                };
+              }
             }
-            else{
-              tmp_match = {
-                book_index: book_index,
-                book_name: book.name,
-                abbrev: book.abbrev,
-                chapter_index: chapter_index,
-                verse_index: verse_index,
-                verse: verse,
-                match_score: 1,
-              };
-            }
-          }
+          });
         });
         if (Object.keys(tmp_match).length > 0) {
+
           matches.push(tmp_match);
         }
       });
@@ -195,16 +199,17 @@ function Search() {
     `
   }) */
   //writeHtml(html)
-  matches=matches.sort((a,b)=>{
+  matches = matches.sort((a, b) => {
     if (a.match_score > b.match_score) {
-    return -1;
-  }
-  if (a.match_score < b.match_score) {
-    return 1;
-  }
+      return -1;
+    }
+    if (a.match_score < b.match_score) {
+      return 1;
+    }
 
-  // names must be equal
-  return 0;})
+    // names must be equal
+    return 0;
+  });
   //matches=matches.filter((m,i)=>{return i<20})
   createSearchSugestions(matches, book_matches);
 }
@@ -237,8 +242,8 @@ function createSearchSugestionsHtml(title, array) {
 }
 function createSearchSugestions(matches, book_matches, best_matches) {
   let html = "";
-  new_testement = matches.filter((match) => match.book_index >= 39)//.filter((m,i)=>{return i<10});
-  old_testement = matches.filter((match) => match.book_index < 39)//.filter((m,i)=>{return i<10});
+  new_testement = matches.filter((match) => match.book_index >= 39); //.filter((m,i)=>{return i<10});
+  old_testement = matches.filter((match) => match.book_index < 39); //.filter((m,i)=>{return i<10});
   books_from_new_testement = [
     ...new Set(
       new_testement.map((book) => {
