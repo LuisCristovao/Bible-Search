@@ -172,7 +172,7 @@ function Search() {
               if (Match(verse_word, word) & (word.trim() != "")) {
                 if (Object.keys(tmp_match) == 0) {
                   let matches_found = {};
-                  let verse_word_key=removeAccents(verse_word).toLowerCase()
+                  let verse_word_key=removeAccents(verse_word).toLowerCase().replaceAll(";",'').replaceAll(":",'').replaceAll(",",'')
                   matches_found[verse_word_key] = 0.1;
                   tmp_match = {
                     book_index: book_index,
@@ -185,7 +185,7 @@ function Search() {
                     match_score: 0,
                   };
                 } else {
-                  let verse_word_key=removeAccents(verse_word).toLowerCase()
+                  let verse_word_key=removeAccents(verse_word).toLowerCase().replaceAll(";",'').replaceAll(":",'').replaceAll(",",'')
                   if (tmp_match.matches_found[verse_word_key] != null) {
                     tmp_match.matches_found[verse_word_key] += 0.1;
                   } else {
