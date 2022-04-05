@@ -132,8 +132,8 @@ function menu() {
 //-----
 //Search functions-----------
 function Match(w1, w2) {
-  let w11=removeAccents(w1).toLowerCase()
-  let w21=removeAccents(w2).toLowerCase()
+  let w11 = removeAccents(w1).toLowerCase();
+  let w21 = removeAccents(w2).toLowerCase();
   return w11.includes(w21);
 }
 function removeAccents(str) {
@@ -165,28 +165,42 @@ function Search() {
       chapter.forEach((verse, verse_index) => {
         tmp_match = {};
         verse.split(" ").forEach((verse_word) => {
-          search_query.split(" ").forEach((word, word_index) => {
-            if (Match(verse_word, word)) {
-              if ((Object.keys(tmp_match).length > 0)) {
-                let score = tmp_match.match_score;
-                score = score + 1;
-                tmp_match.match_score = score;
-              } else {
-                tmp_match = {
-                  book_index: book_index,
-                  book_name: book.name,
-                  abbrev: book.abbrev,
-                  chapter_index: chapter_index,
-                  verse_index: verse_index,
-                  verse: verse,
-                  match_score: 1,
-                };
+          search_query
+            .split(" ")
+            .filter((word) => (word.trim() != "") & (word.trim().length > 2))
+            .forEach((word, word_index) => {
+              if (Match(verse_word, word) & (word.trim() != "")) {
+                if (Object.keys(tmp_match) == 0) {
+                  let matches_found = {};
+                  let verse_word_key=removeAccents(verse_word).toLowerCase()
+                  matches_found[verse_word_key] = 0.1;
+                  tmp_match = {
+                    book_index: book_index,
+                    book_name: book.name,
+                    abbrev: book.abbrev,
+                    chapter_index: chapter_index,
+                    verse_index: verse_index,
+                    verse: verse,
+                    matches_found: matches_found,
+                    match_score: 0,
+                  };
+                } else {
+                  let verse_word_key=removeAccents(verse_word).toLowerCase()
+                  if (tmp_match.matches_found[verse_word_key] != null) {
+                    tmp_match.matches_found[verse_word_key] += 0.1;
+                  } else {
+                    tmp_match.matches_found[verse_word_key] = 0.1;
+                  }
+                }
               }
-            }
-          });
+            });
         });
         if (Object.keys(tmp_match).length > 0) {
-
+          let match_score = 0;
+          Object.keys(tmp_match.matches_found).forEach((key) => {
+            match_score += 10 + tmp_match.matches_found[key];
+          });
+          tmp_match["match_score"] = match_score;
           matches.push(tmp_match);
         }
       });
@@ -211,7 +225,7 @@ function Search() {
     return 0;
   });
   //matches=matches.filter((m,i)=>{return i<20})
-  createSearchSugestions(matches, book_matches);
+  createSearchSugestions(matches, book_matches,matches.filter((value,index)=>index<10));
 }
 function createSearchSugestionsHtml(title, array) {
   let html = "<div>";
@@ -272,11 +286,24 @@ function createSearchSugestions(matches, book_matches, best_matches) {
       data: old_testement.filter((book) => book.book_name == book_name),
     });
   });
+  console.log(best_matches)
   console.log(books_from_new_testement_array);
   console.log(books_from_old_testement_array);
 
   //Best search------
-
+  html += "<div>";
+  html += `<h1 style="text-decoration:underline;cursor:pointer" onclick="showChildren(this)">Melhores Pesquisas (${best_matches.length}) &#x25BC;</h1>`;
+  html += `<div style="display: none;">`;
+  best_matches.forEach((match) => {
+    let book_index = match.book_index;
+    let chapter_index = match.chapter_index;
+    let verse_index = match.verse_index;
+    let verse = match.verse;
+    //html+=chapterHtml(book_index,chapter_index)
+    html += verseHtml(book_index, chapter_index, verse_index, verse);
+  });
+  html += "</div>";
+  html += "</div>";
   //books----
   //html+=createSearchSugestionsHtml("Livros",book_matches)
   //new testement
