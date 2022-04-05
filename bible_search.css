@@ -7,7 +7,23 @@
 .menu_class{
     margin-left: 125px;
 }
-
+body{
+    background-color: black;
+}
+h1,h2,h3,p{
+   color: rgb(190, 187, 187); 
+}
+a{
+    color: rgb(5, 134, 167);
+}
+input{
+    
+    background-color: black;
+    border-color: gainsboro;
+    color: gainsboro;
+    border-radius: 6px;
+    height: 23px;
+}
 /*#content{
     text-align: center;
     
