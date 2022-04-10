@@ -149,7 +149,12 @@ function menu() {
 function Match(w1, w2) {
   let w11 = removeAccents(w1).toLowerCase();
   let w21 = removeAccents(w2).toLowerCase();
-  return w11.includes(w21);
+  if(supercompare(w11,w21)>=1.1){
+    return true
+  }else{ 
+    return false
+  }
+  //return w11.includes(w21);
 }
 function removeAccents(str) {
   return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -182,8 +187,9 @@ function Search() {
         verse.split(" ").forEach((verse_word) => {
           search_query
             .split(" ")
-            .filter((word) => (word.trim() != "") & (word.trim().length > 2))
+            //.filter((word) => (word.trim() != "") & (word.trim().length > 2))
             .forEach((word, word_index) => {
+              let result=Match(verse_word, word)
               if (Match(verse_word, word) & (word.trim() != "")) {
                 if (Object.keys(tmp_match) == 0) {
                   let matches_found = {};
@@ -192,7 +198,7 @@ function Search() {
                     .replaceAll(";", "")
                     .replaceAll(":", "")
                     .replaceAll(",", "");
-                  matches_found[verse_word_key] = 0.1;
+                  matches_found[verse_word_key] = supercompare(removeAccents(word).toLowerCase(),verse_word_key);
                   tmp_match = {
                     book_index: book_index,
                     book_name: book.name,
@@ -210,9 +216,9 @@ function Search() {
                     .replaceAll(":", "")
                     .replaceAll(",", "");
                   if (tmp_match.matches_found[verse_word_key] != null) {
-                    tmp_match.matches_found[verse_word_key] += 0.1;
+                    tmp_match.matches_found[verse_word_key] += supercompare(removeAccents(word).toLowerCase(),verse_word_key);
                   } else {
-                    tmp_match.matches_found[verse_word_key] = 0.1;
+                    tmp_match.matches_found[verse_word_key] = supercompare(removeAccents(word).toLowerCase(),verse_word_key);
                   }
                 }
               }
@@ -220,8 +226,12 @@ function Search() {
         });
         if (Object.keys(tmp_match).length > 0) {
           let match_score = 0;
-          Object.keys(tmp_match.matches_found).forEach((key) => {
+          let words=search_query.split(" ").map(word=>removeAccents(word).toLowerCase())
+          Object.keys(tmp_match.matches_found).forEach((key,key_index) => {
             match_score += 10 + tmp_match.matches_found[key];
+            if(words[key_index]==key){
+              match_score += 10
+            }
           });
           tmp_match["match_score"] = match_score;
           matches.push(tmp_match);
