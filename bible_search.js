@@ -325,6 +325,7 @@ function startSearch(e) {
     let search = document.getElementById("search").value;
     window.location.search = `?search=${search}`;
     //alert("Enter is pressed!");
+    
   }
 }
 function showChildren(element) {
@@ -375,7 +376,8 @@ const pages = {
     createHome();
   },
   "?search": () => {
-    Search();
+    document.getElementById("content").innerHTML="<h2>Loading...</h2>"
+    setTimeout(Search,10);
   },
   "?book": () => {
     selectBiBlePart();
