@@ -1,4 +1,19 @@
 var bible_data;
+
+function scrollToTop(btn) {
+  //document.body.scrollTo(0,0)
+  document.body.scrollTop = 0;
+  document.documentElement.scrollTop = 0;
+  btn.style.display = "none";
+}
+function scrollFunction(btn) {
+  if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+    btn.style.display = "block";
+  } else {
+    btn.style.display = "none";
+  }
+}
+
 function getRndInteger(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
 }
@@ -172,7 +187,11 @@ function Search() {
               if (Match(verse_word, word) & (word.trim() != "")) {
                 if (Object.keys(tmp_match) == 0) {
                   let matches_found = {};
-                  let verse_word_key=removeAccents(verse_word).toLowerCase().replaceAll(";",'').replaceAll(":",'').replaceAll(",",'')
+                  let verse_word_key = removeAccents(verse_word)
+                    .toLowerCase()
+                    .replaceAll(";", "")
+                    .replaceAll(":", "")
+                    .replaceAll(",", "");
                   matches_found[verse_word_key] = 0.1;
                   tmp_match = {
                     book_index: book_index,
@@ -185,7 +204,11 @@ function Search() {
                     match_score: 0,
                   };
                 } else {
-                  let verse_word_key=removeAccents(verse_word).toLowerCase().replaceAll(";",'').replaceAll(":",'').replaceAll(",",'')
+                  let verse_word_key = removeAccents(verse_word)
+                    .toLowerCase()
+                    .replaceAll(";", "")
+                    .replaceAll(":", "")
+                    .replaceAll(",", "");
                   if (tmp_match.matches_found[verse_word_key] != null) {
                     tmp_match.matches_found[verse_word_key] += 0.1;
                   } else {
@@ -225,8 +248,13 @@ function Search() {
     return 0;
   });
   //matches=matches.filter((m,i)=>{return i<20})
-  createSearchSugestions(matches, book_matches,matches.filter((value,index)=>index<10));
+  createSearchSugestions(
+    matches,
+    book_matches,
+    matches.filter((value, index) => index < 10)
+  );
 }
+
 function createSearchSugestionsHtml(title, array) {
   let html = "<div>";
   html += `<h1 style="text-decoration:underline;cursor:pointer" onclick="showChildren(this)">${title} (${array.length}) &#x25BC;</h1>`;
@@ -254,6 +282,7 @@ function createSearchSugestionsHtml(title, array) {
   html += `</div></div>`;
   return html;
 }
+
 function createSearchSugestions(matches, book_matches, best_matches) {
   let html = "";
   new_testement = matches.filter((match) => match.book_index >= 39); //.filter((m,i)=>{return i<10});
@@ -286,7 +315,7 @@ function createSearchSugestions(matches, book_matches, best_matches) {
       data: old_testement.filter((book) => book.book_name == book_name),
     });
   });
-  console.log(best_matches)
+  console.log(best_matches);
   console.log(books_from_new_testement_array);
   console.log(books_from_old_testement_array);
 
@@ -320,12 +349,12 @@ function createSearchSugestions(matches, book_matches, best_matches) {
 
   writeHtml(html);
 }
+
 function startSearch(e) {
   if (e.key === "Enter") {
     let search = document.getElementById("search").value;
     window.location.search = `?search=${search}`;
     //alert("Enter is pressed!");
-    
   }
 }
 function showChildren(element) {
@@ -376,8 +405,8 @@ const pages = {
     createHome();
   },
   "?search": () => {
-    document.getElementById("content").innerHTML="<h2>Loading...</h2>"
-    setTimeout(Search,10);
+    document.getElementById("content").innerHTML = "<h2>Loading...</h2>";
+    setTimeout(Search, 10);
   },
   "?book": () => {
     selectBiBlePart();
@@ -393,6 +422,7 @@ window.onload = async () => {
   pages[page]();
   let search = document.getElementById("search");
   search.addEventListener("keydown", startSearch);
+  window.onscroll = ()=> {scrollFunction(document.getElementById("scrollTopBtn"))};
   //handle footer
   if (window.outerHeight >= document.body.offsetHeight) {
     footer.setAttribute(
