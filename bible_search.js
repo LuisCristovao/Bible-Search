@@ -111,8 +111,8 @@ function menu() {
   let menu_states = {
     start_menu: () => {
       let html = `
-      <a href="?" ><h1 class="menu_class">Home</h1></a>
-      <a href="?menu=books_menu" ><h1 class="menu_class">Books</h1></a>
+      <a href="?" ><h1 class="menu_class">Inicio</h1></a>
+      <a href="?menu=books_menu" ><h1 class="menu_class">Livros</h1></a>
       `;
       return html;
     },
