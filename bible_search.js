@@ -434,12 +434,19 @@ window.onload = async () => {
   search.addEventListener("keydown", startSearch);
   window.onscroll = ()=> {scrollFunction(document.getElementById("scrollTopBtn"))};
   //handle footer
-  if (window.outerHeight >= document.body.offsetHeight) {
+  /* if (window.outerHeight >= document.body.offsetHeight) {
     footer.setAttribute(
       "style",
       `position:absolute;top:${window.innerHeight - 50}px`
     );
   } else {
     footer.setAttribute("style", `margin-top:10%`);
+  } */
+  //teste web worker
+  let workers = new Worker("./search_worker.js");
+  workers.onmessage =(msg)=>{
+    console.log("Dados do worker")
+    console.log(msg)
   }
+  workers.postMessage({"bible_data":bible_data})
 };
