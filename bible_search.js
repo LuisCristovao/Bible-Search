@@ -425,7 +425,7 @@ const pages = {
     menu("start menu");
   },
 };
-
+const range = (start, stop, step) => Array.from({ length: (stop - start) / step + 1}, (_, i) => start + (i * step));
 window.onload = async () => {
   bible_data = await readBiBle();
   let page = window.location.search.split("=")[0];
@@ -442,11 +442,20 @@ window.onload = async () => {
   } else {
     footer.setAttribute("style", `margin-top:10%`);
   } */
-  //teste web worker
-  let workers = new Worker("./search_worker.js");
-  workers.onmessage =(msg)=>{
-    console.log("Dados do worker")
-    console.log(msg)
-  }
-  workers.postMessage({"bible_data":bible_data})
+  //teste web worker-----
+  let search_query = "Deus Jesus"
+  let workers=[]
+  let n_partitions=5
+  let n_regists_per_partition=Math.round(bible_data.length/n_partitions)
+  range(0,n_partitions,1).forEach(index=>{
+    let w = new Worker("./search_worker.js");
+    w.onmessage =(msg)=>{
+      console.log("Dados do worker")
+      console.log(msg)
+    }
+    console.log("start: "+n_regists_per_partition*index+"\n end: "+n_regists_per_partition*(index+1))
+    w.postMessage({"bible_data":bible_data.filter((el,i)=>(i>=n_regists_per_partition*index && i<n_regists_per_partition*(index+1))),"search_query":search_query})
+  })
+  
+
 };
