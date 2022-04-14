@@ -447,14 +447,37 @@ window.onload = async () => {
   let workers=[]
   let n_partitions=5
   let n_regists_per_partition=Math.round(bible_data.length/n_partitions)
-  range(0,n_partitions,1).forEach(index=>{
+  range(0,n_partitions-1,1).forEach(index=>{
     let w = new Worker("./search_worker.js");
     w.onmessage =(msg)=>{
       console.log("Dados do worker")
       console.log(msg)
     }
-    console.log("start: "+n_regists_per_partition*index+"\n end: "+n_regists_per_partition*(index+1))
-    w.postMessage({"bible_data":bible_data.filter((el,i)=>(i>=n_regists_per_partition*index && i<n_regists_per_partition*(index+1))),"search_query":search_query})
+    let start=0
+    let end=0
+    if ((index+1)==n_partitions){
+      if(n_regists_per_partition*(index+1)<bible_data.length){
+        start=n_regists_per_partition*index ;end=bible_data.length
+      }else{
+        start=n_regists_per_partition*index ;end=n_regists_per_partition*(index+1)
+      }
+    }
+    else{
+      start=n_regists_per_partition*index ; end=n_regists_per_partition*(index+1)
+    }
+    console.log("start: "+start+"\n end: "+end)
+    w.postMessage({"bible_data":bible_data.filter((el,i)=>{
+      if ((index+1)==n_partitions){
+        if(n_regists_per_partition*(index+1)<bible_data.length){
+          return (i>=n_regists_per_partition*index && i<=bible_data.length)
+        }else{
+          return (i>=n_regists_per_partition*index && i<=n_regists_per_partition*(index+1))
+        }
+      }
+      else{
+        return (i>=n_regists_per_partition*index && i<n_regists_per_partition*(index+1))
+      }
+    }),"search_query":search_query})
   })
   
 
