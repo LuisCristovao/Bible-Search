@@ -159,7 +159,10 @@ function Match(w1, w2) {
 function removeAccents(str) {
   return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 }
-function Search() {
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+async function Search() {
   let search_query = removeAccents(
     decodeURI(window.location.search.split("search=")[1])
   ).toLowerCase();
@@ -169,83 +172,35 @@ function Search() {
   let matches = [];
   let book_matches = [];
   let tmp_match = {};
-  bible_data.forEach((book, book_index) => {
-    let name = removeAccents(book.name).toLowerCase();
-    let abbrev = removeAccents(book.abbrev).toLowerCase();
-    book.chapters.forEach((chapter, chapter_index) => {
-      search_query.split(" ").forEach((word) => {
-        if (Match(name, word) || Match(word, abbrev)) {
-          book_matches.push({
-            book_index: book_index,
-            book_name: book.name,
-            abbrev: book.abbrev,
-          });
+  //web workers------------
+  let workers_done=0
+  let n_partitions=30
+  let n_regists_per_partition=Math.round(bible_data.length/n_partitions)
+  range(0,n_partitions-1,1).forEach(index=>{
+    let w = new Worker("./search_worker.js");
+    w.onmessage =(msg)=>{
+      console.log("Dados do worker ")
+      matches=matches.concat(msg.data)
+      workers_done+=1
+    }
+    w.postMessage({"bible_data":bible_data.filter((el,i)=>{
+      if ((index+1)==n_partitions){
+        if(n_regists_per_partition*(index+1)<bible_data.length){
+          return (i>=n_regists_per_partition*index && i<=bible_data.length)
+        }else{
+          return (i>=n_regists_per_partition*index && i<=n_regists_per_partition*(index+1))
         }
-      });
-      chapter.forEach((verse, verse_index) => {
-        tmp_match = {};
-        verse.split(" ").forEach((verse_word) => {
-          search_query
-            .split(" ")
-            //.filter((word) => (word.trim() != "") & (word.trim().length > 2))
-            .forEach((word, word_index) => {
-              let result=Match(verse_word, word)
-              if (Match(verse_word, word) & (word.trim() != "")) {
-                if (Object.keys(tmp_match) == 0) {
-                  let matches_found = {};
-                  let verse_word_key = removeAccents(verse_word)
-                    .toLowerCase()
-                    .replaceAll(";", "")
-                    .replaceAll(":", "")
-                    .replaceAll(",", "");
-                  matches_found[verse_word_key] = supercompare(removeAccents(word).toLowerCase(),verse_word_key);
-                  tmp_match = {
-                    book_index: book_index,
-                    book_name: book.name,
-                    abbrev: book.abbrev,
-                    chapter_index: chapter_index,
-                    verse_index: verse_index,
-                    verse: verse,
-                    matches_found: matches_found,
-                    match_score: 0,
-                  };
-                } else {
-                  let verse_word_key = removeAccents(verse_word)
-                    .toLowerCase()
-                    .replaceAll(";", "")
-                    .replaceAll(":", "")
-                    .replaceAll(",", "");
-                  if (tmp_match.matches_found[verse_word_key] != null) {
-                    tmp_match.matches_found[verse_word_key] += supercompare(removeAccents(word).toLowerCase(),verse_word_key);
-                  } else {
-                    tmp_match.matches_found[verse_word_key] = supercompare(removeAccents(word).toLowerCase(),verse_word_key);
-                  }
-                }
-              }
-            });
-        });
-        if (Object.keys(tmp_match).length > 0) {
-          let match_score = 0;
-          let words=search_query.split(" ").map(word=>removeAccents(word).toLowerCase())
-          Object.keys(tmp_match.matches_found).forEach((key,key_index) => {
-            match_score += 10 + tmp_match.matches_found[key];
-            if(words[key_index]==key){
-              match_score += 10
-            }
-          });
-          tmp_match["match_score"] = match_score;
-          matches.push(tmp_match);
-        }
-      });
-    });
-  });
-  /* let html=""
-  matches.forEach((match)=>{
-    html+=`
-    <a href="?menu=book_menu;${match.book_index+1}"><h1>${match.book_name}</h1></a>
-    `
-  }) */
-  //writeHtml(html)
+      }
+      else{
+        return (i>=n_regists_per_partition*index && i<n_regists_per_partition*(index+1))
+      }
+    }),"search_query":search_query})
+
+  })
+  while(workers_done<n_partitions){
+    document.getElementById("content").innerHTML = `<h2>Loading...(${workers_done}/${n_partitions})</h2>`;
+    await sleep(1000)
+  }
   matches = matches.sort((a, b) => {
     if (a.match_score > b.match_score) {
       return -1;
@@ -416,7 +371,7 @@ const pages = {
   },
   "?search": () => {
     document.getElementById("content").innerHTML = "<h2>Loading...</h2>";
-    setTimeout(Search, 10);
+    setTimeout(Search, 100);
   },
   "?book": () => {
     selectBiBlePart();
@@ -443,42 +398,7 @@ window.onload = async () => {
     footer.setAttribute("style", `margin-top:10%`);
   } */
   //teste web worker-----
-  let search_query = "Deus Jesus"
-  let workers=[]
-  let n_partitions=5
-  let n_regists_per_partition=Math.round(bible_data.length/n_partitions)
-  range(0,n_partitions-1,1).forEach(index=>{
-    let w = new Worker("./search_worker.js");
-    w.onmessage =(msg)=>{
-      console.log("Dados do worker")
-      console.log(msg)
-    }
-    let start=0
-    let end=0
-    if ((index+1)==n_partitions){
-      if(n_regists_per_partition*(index+1)<bible_data.length){
-        start=n_regists_per_partition*index ;end=bible_data.length
-      }else{
-        start=n_regists_per_partition*index ;end=n_regists_per_partition*(index+1)
-      }
-    }
-    else{
-      start=n_regists_per_partition*index ; end=n_regists_per_partition*(index+1)
-    }
-    console.log("start: "+start+"\n end: "+end)
-    w.postMessage({"bible_data":bible_data.filter((el,i)=>{
-      if ((index+1)==n_partitions){
-        if(n_regists_per_partition*(index+1)<bible_data.length){
-          return (i>=n_regists_per_partition*index && i<=bible_data.length)
-        }else{
-          return (i>=n_regists_per_partition*index && i<=n_regists_per_partition*(index+1))
-        }
-      }
-      else{
-        return (i>=n_regists_per_partition*index && i<n_regists_per_partition*(index+1))
-      }
-    }),"search_query":search_query})
-  })
+  
   
 
 };
