@@ -119,15 +119,15 @@ function SearchWorker(bible_data,search_query,start_index) {
               .split(" ")
               //.filter((word) => (word.trim() != "") & (word.trim().length > 2))
               .forEach((word, word_index) => {
-                let result=Match(verse_word, word)
-                if (Match(verse_word, word) & (word.trim() != "")) {
+                let verse_word2=removeAccents(verse_word)
+                .toLowerCase()
+                .replaceAll(";", "")
+                .replaceAll(":", "")
+                .replaceAll(",", "");
+                if (Match(verse_word2, word) & (word.trim() != "")) {
                   if (Object.keys(tmp_match) == 0) {
                     let matches_found = {};
-                    let verse_word_key = removeAccents(verse_word)
-                      .toLowerCase()
-                      .replaceAll(";", "")
-                      .replaceAll(":", "")
-                      .replaceAll(",", "");
+                    let verse_word_key = verse_word2
                     matches_found[verse_word_key] = supercompare(removeAccents(word).toLowerCase(),verse_word_key);
                     tmp_match = {
                       book_index: start_index + book_index,

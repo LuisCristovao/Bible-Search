@@ -201,7 +201,7 @@ async function Search() {
   })
   while(workers_done<n_partitions){
     document.getElementById("content").innerHTML = `<h2>Loading...(${workers_done}/${n_partitions})</h2>`;
-    await sleep(1000)
+    await sleep(300)
   }
   matches = matches.sort((a, b) => {
     if (a.match_score > b.match_score) {
