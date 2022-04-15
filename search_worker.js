@@ -93,7 +93,7 @@ function Match(w1, w2) {
   function removeAccents(str) {
     return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   }
-function SearchWorker(bible_data,search_query) {
+function SearchWorker(bible_data,search_query,start_index) {
     //let search_query = "brado jesus"
     //document.getElementById("search").value = "Deus"
     let matches = [];
@@ -130,7 +130,7 @@ function SearchWorker(bible_data,search_query) {
                       .replaceAll(",", "");
                     matches_found[verse_word_key] = supercompare(removeAccents(word).toLowerCase(),verse_word_key);
                     tmp_match = {
-                      book_index: book_index,
+                      book_index: start_index + book_index,
                       book_name: book.name,
                       abbrev: book.abbrev,
                       chapter_index: chapter_index,
@@ -191,6 +191,6 @@ function SearchWorker(bible_data,search_query) {
   }
 
 this.onmessage = function(input_data) {
-    let matches=SearchWorker(input_data.data.bible_data,input_data.data.search_query)
+    let matches=SearchWorker(input_data.data.bible_data,input_data.data.search_query,input_data.data.start_index)
     this.postMessage(matches);
 };

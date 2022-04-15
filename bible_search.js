@@ -174,7 +174,7 @@ async function Search() {
   let tmp_match = {};
   //web workers------------
   let workers_done=0
-  let n_partitions=30
+  let n_partitions=5
   let n_regists_per_partition=Math.round(bible_data.length/n_partitions)
   range(0,n_partitions-1,1).forEach(index=>{
     let w = new Worker("./search_worker.js");
@@ -183,6 +183,8 @@ async function Search() {
       matches=matches.concat(msg.data)
       workers_done+=1
     }
+    let start_index=n_regists_per_partition*index
+    
     w.postMessage({"bible_data":bible_data.filter((el,i)=>{
       if ((index+1)==n_partitions){
         if(n_regists_per_partition*(index+1)<bible_data.length){
@@ -194,7 +196,7 @@ async function Search() {
       else{
         return (i>=n_regists_per_partition*index && i<n_regists_per_partition*(index+1))
       }
-    }),"search_query":search_query})
+    }),"search_query":search_query,"start_index":start_index})
 
   })
   while(workers_done<n_partitions){
