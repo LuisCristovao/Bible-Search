@@ -150,10 +150,10 @@ function menu() {
 function Match(w1, w2) {
   let w11 = removeAccents(w1).toLowerCase();
   let w21 = removeAccents(w2).toLowerCase();
-  if(supercompare(w11,w21)>=1.1){
-    return true
-  }else{ 
-    return false
+  if (supercompare(w11, w21) >= 1.1) {
+    return true;
+  } else {
+    return false;
   }
   //return w11.includes(w21);
 }
@@ -161,7 +161,7 @@ function removeAccents(str) {
   return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 }
 function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 async function Search() {
   let search_query = removeAccents(
@@ -174,35 +174,47 @@ async function Search() {
   let book_matches = [];
   let tmp_match = {};
   //web workers------------
-  let workers_done=0
-  let n_partitions=5
-  let n_regists_per_partition=Math.round(bible_data.length/n_partitions)
-  range(0,n_partitions-1,1).forEach(index=>{
+  let workers_done = 0;
+  let n_partitions = 5;
+  let n_regists_per_partition = Math.round(bible_data.length / n_partitions);
+  range(0, n_partitions - 1, 1).forEach((index) => {
     let w = new Worker("./search_worker.js");
-    w.onmessage =(msg)=>{
-      console.log("Dados do worker ")
-      matches=matches.concat(msg.data)
-      workers_done+=1
-    }
-    let start_index=n_regists_per_partition*index
-    
-    w.postMessage({"bible_data":bible_data.filter((el,i)=>{
-      if ((index+1)==n_partitions){
-        if(n_regists_per_partition*(index+1)<bible_data.length){
-          return (i>=n_regists_per_partition*index && i<=bible_data.length)
-        }else{
-          return (i>=n_regists_per_partition*index && i<=n_regists_per_partition*(index+1))
-        }
-      }
-      else{
-        return (i>=n_regists_per_partition*index && i<n_regists_per_partition*(index+1))
-      }
-    }),"search_query":search_query,"start_index":start_index})
+    w.onmessage = (msg) => {
+      console.log("Dados do worker ");
+      matches = matches.concat(msg.data);
+      workers_done += 1;
+    };
+    let start_index = n_regists_per_partition * index;
 
-  })
-  while(workers_done<n_partitions){
-    document.getElementById("content").innerHTML = `<h2>Loading...(${workers_done}/${n_partitions})</h2>`;
-    await sleep(300)
+    w.postMessage({
+      bible_data: bible_data.filter((el, i) => {
+        if (index + 1 == n_partitions) {
+          if (n_regists_per_partition * (index + 1) < bible_data.length) {
+            return (
+              i >= n_regists_per_partition * index && i <= bible_data.length
+            );
+          } else {
+            return (
+              i >= n_regists_per_partition * index &&
+              i <= n_regists_per_partition * (index + 1)
+            );
+          }
+        } else {
+          return (
+            i >= n_regists_per_partition * index &&
+            i < n_regists_per_partition * (index + 1)
+          );
+        }
+      }),
+      search_query: search_query,
+      start_index: start_index,
+    });
+  });
+  while (workers_done < n_partitions) {
+    document.getElementById(
+      "content"
+    ).innerHTML = `<h2>Loading...(${workers_done}/${n_partitions})</h2>`;
+    await sleep(300);
   }
   matches = matches.sort((a, b) => {
     if (a.match_score > b.match_score) {
@@ -239,7 +251,11 @@ function createSearchSugestionsHtml(title, array) {
       let book_index = chapter_obj.book_index;
       let chapter_index = chapter_obj.chapter_index;
       let verse_index = chapter_obj.verse_index;
-      let verse = chapter_obj.verse;
+      let words_to_highlight = chapter_obj.verse_exact_found_words;
+      let verse = highLightVerse({
+        verse: chapter_obj.verse,
+        high_light_words: Object.keys(words_to_highlight),
+      });
       //html+=chapterHtml(book_index,chapter_index)
       html += verseHtml(book_index, chapter_index, verse_index, verse);
     });
@@ -249,12 +265,12 @@ function createSearchSugestionsHtml(title, array) {
   html += `</div></div>`;
   return html;
 }
-function highLightVerse(inputs){
-  let verse=inputs.verse
-  inputs.high_light_words.forEach(word=>{
-    verse=verse.replaceAll(word,`<b><font color="gold">${word}</font></b>`)
-  })
-  return verse
+function highLightVerse(inputs) {
+  let verse = inputs.verse;
+  inputs.high_light_words.forEach((word) => {
+    verse = verse.replaceAll(word, `<b><font color="gold">${word}</font></b>`);
+  });
+  return verse;
 }
 function createSearchSugestions(matches, best_matches) {
   let html = "";
@@ -300,9 +316,12 @@ function createSearchSugestions(matches, best_matches) {
     let book_index = match.book_index;
     let chapter_index = match.chapter_index;
     let verse_index = match.verse_index;
-    let words_to_highlight=match.verse_exact_found_words
-    let verse =  highLightVerse({verse:match.verse,high_light_words:Object.keys(words_to_highlight)});
-    
+    let words_to_highlight = match.verse_exact_found_words;
+    let verse = highLightVerse({
+      verse: match.verse,
+      high_light_words: Object.keys(words_to_highlight),
+    });
+
     //html+=chapterHtml(book_index,chapter_index)
     html += verseHtml(book_index, chapter_index, verse_index, verse);
   });
@@ -390,14 +409,17 @@ const pages = {
     menu("start menu");
   },
 };
-const range = (start, stop, step) => Array.from({ length: (stop - start) / step + 1}, (_, i) => start + (i * step));
+const range = (start, stop, step) =>
+  Array.from({ length: (stop - start) / step + 1 }, (_, i) => start + i * step);
 window.onload = async () => {
   bible_data = await readBiBle();
   let page = window.location.search.split("=")[0];
   pages[page]();
   let search = document.getElementById("search");
   search.addEventListener("keydown", startSearch);
-  window.onscroll = ()=> {scrollFunction(document.getElementById("scrollTopBtn"))};
+  window.onscroll = () => {
+    scrollFunction(document.getElementById("scrollTopBtn"));
+  };
   //handle footer
   /* if (window.outerHeight >= document.body.offsetHeight) {
     footer.setAttribute(
@@ -408,7 +430,4 @@ window.onload = async () => {
     footer.setAttribute("style", `margin-top:10%`);
   } */
   //teste web worker-----
-  
-  
-
 };
