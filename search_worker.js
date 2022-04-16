@@ -117,7 +117,7 @@ function SearchWorker(bible_data, search_query, start_index) {
         verse.split(" ").forEach((verse_word) => {
           search_query
             .split(" ")
-            //.filter((word) => (word.trim() != "") & (word.trim().length > 2))
+            .filter((word) => (word.trim() != "") & (word.trim().length > 2))
             .forEach((word, word_index) => {
               let verse_word2 = removeAccents(verse_word)
                 .toLowerCase()

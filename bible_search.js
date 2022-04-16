@@ -30,6 +30,7 @@ function chapterHtml(book_index, chapter_index) {
     chapter_index + 1
   }"><h2>Capítulo ${chapter_index + 1}</h2></a>`;
 }
+
 function verseHtml(book_index, chapter_index, verse_index, verse) {
   return `<p>${verse_index + 1}: ${verse} &nbsp;&nbsp;<a href="?book=${
     book_index + 1
@@ -217,7 +218,6 @@ async function Search() {
   //matches=matches.filter((m,i)=>{return i<20})
   createSearchSugestions(
     matches,
-    book_matches,
     matches.filter((value, index) => index < 10)
   );
 }
@@ -249,8 +249,14 @@ function createSearchSugestionsHtml(title, array) {
   html += `</div></div>`;
   return html;
 }
-
-function createSearchSugestions(matches, book_matches, best_matches) {
+function highLightVerse(inputs){
+  let verse=inputs.verse
+  inputs.high_light_words.forEach(word=>{
+    verse=verse.replaceAll(word,`<b><font color="gold">${word}</font></b>`)
+  })
+  return verse
+}
+function createSearchSugestions(matches, best_matches) {
   let html = "";
   new_testement = matches.filter((match) => match.book_index >= 39); //.filter((m,i)=>{return i<10});
   old_testement = matches.filter((match) => match.book_index < 39); //.filter((m,i)=>{return i<10});
@@ -294,7 +300,9 @@ function createSearchSugestions(matches, book_matches, best_matches) {
     let book_index = match.book_index;
     let chapter_index = match.chapter_index;
     let verse_index = match.verse_index;
-    let verse = match.verse;
+    let words_to_highlight=match.verse_exact_found_words
+    let verse =  highLightVerse({verse:match.verse,high_light_words:Object.keys(words_to_highlight)});
+    
     //html+=chapterHtml(book_index,chapter_index)
     html += verseHtml(book_index, chapter_index, verse_index, verse);
   });
