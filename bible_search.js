@@ -36,7 +36,9 @@ function verseHtml(book_index, chapter_index, verse_index, verse) {
     book_index + 1
   };chapter=${chapter_index + 1};verse=${
     verse_index + 1
-  }">></a>&nbsp;&nbsp;<a onclick="saveToFavorites(this,${book_index+1},${chapter_index+1},${verse_index+1})" >&star;</a></p>`;
+  }">></a>&nbsp;&nbsp;<a onclick="saveToFavorites(this,${book_index + 1},${
+    chapter_index + 1
+  },${verse_index + 1})" >&star;</a></p>`;
 }
 function showBibleVerse(book_index = -1, chapter_index = -1, verse_index = -1) {
   let html = "";
@@ -156,25 +158,31 @@ function readLocalDB() {
 }
 function writeLocalDB(db) {
   if (localStorage["Bible-Search"] == undefined) {
-    localStorage["Bible-Search"]={}
+    localStorage["Bible-Search"] = {};
   }
   localStorage["Bible-Search"] = JSON.stringify(db);
 }
 function saveToFavorites(start_el, book_index, chapter_index, verse_index) {
   if (localStorage["Bible-Search"] == undefined) {
-    let bd = {"favorites_list":{}};
+    let bd = { favorites_list: {} };
     bd["favorites_list"][`${book_index}_${chapter_index}_${verse_index}`] = {
       description: "",
     };
     writeLocalDB(bd);
   } else {
     let bd = readLocalDB();
-    bd["favorites_list"][`${book_index}_${chapter_index}_${verse_index}`] = {
-      description: "",
-    };
-    writeLocalDB(bd);
+    //if already exists on favorites it means he/she wants to remove
+    if (bd["favorites_list"][`${book_index}_${chapter_index}_${verse_index}`] !=undefined) {
+      removeFromFavorites(book_index, chapter_index, verse_index)
+      start_el.innerHTML = "&star;";
+    } else {
+      bd["favorites_list"][`${book_index}_${chapter_index}_${verse_index}`] = {
+        description: "",
+      };
+      writeLocalDB(bd);
+      start_el.innerHTML = "&starf;";
+    }
   }
-  start_el.innerHTML = "&starf;";
 }
 function removeFromFavorites(book_index, chapter_index, verse_index) {
   let bd = readLocalDB();
