@@ -145,7 +145,42 @@ function menu() {
   writeHtml(menu_states[state]());
 }
 
-//-----
+//Favorites-----
+function readLocalDB(){
+  if(localStorage["Bible-Search"]==undefined){
+    return ""
+  }
+  return JSON.parse(localStorage["Bible-Search"])
+}
+function writeLocalDB(db){
+  if(localStorage["Bible-Search"]!=undefined){
+    localStorage["Bible-Search"]=JSON.stringify(db)
+  }
+}
+function saveToFavorites(book_index,chapter_index,verse_index){
+
+  if(localStorage["Bible-Search"]==undefined){
+    let bd={}
+    bd["favorites_list"][`${book_index}_${chapter_index}_${verse_index}`]={"description":""}
+    writeLocalDB(bd)
+  }else{
+    let bd=readLocalDB()
+    bd["favorites_list"][`${book_index}_${chapter_index}_${verse_index}`]={"description":""}
+    writeLocalDB(bd)
+  }
+
+}
+function removeFromFavorites(book_index,chapter_index,verse_index){
+  let bd=readLocalDB()
+  delete bd["favorites_list"][`${book_index}_${chapter_index}_${verse_index}`]
+  writeLocalDB(bd)
+}
+function editFavoriteVerseDescription(book_index,chapter_index,verse_index,description){
+  let bd=readLocalDB()
+  bd["favorites_list"][`${book_index}_${chapter_index}_${verse_index}`]["description"]=description
+  writeLocalDB(bd)
+}
+
 //Search functions-----------
 function Match(w1, w2) {
   let w11 = removeAccents(w1).toLowerCase();
