@@ -34,7 +34,9 @@ function chapterHtml(book_index, chapter_index) {
 function verseHtml(book_index, chapter_index, verse_index, verse) {
   return `<p>${verse_index + 1}: ${verse} &nbsp;&nbsp;<a href="?book=${
     book_index + 1
-  };chapter=${chapter_index + 1};verse=${verse_index + 1}">></a>&nbsp;&nbsp;<a href="">&starf;</a></p>`;
+  };chapter=${chapter_index + 1};verse=${
+    verse_index + 1
+  }">></a>&nbsp;&nbsp;<a onclick="saveToFavorites(this,${book_index+1},${chapter_index+1},${verse_index+1})" >&star;</a></p>`;
 }
 function showBibleVerse(book_index = -1, chapter_index = -1, verse_index = -1) {
   let html = "";
@@ -146,39 +148,50 @@ function menu() {
 }
 
 //Favorites-----
-function readLocalDB(){
-  if(localStorage["Bible-Search"]==undefined){
-    return ""
+function readLocalDB() {
+  if (localStorage["Bible-Search"] == undefined) {
+    return "";
   }
-  return JSON.parse(localStorage["Bible-Search"])
+  return JSON.parse(localStorage["Bible-Search"]);
 }
-function writeLocalDB(db){
-  if(localStorage["Bible-Search"]!=undefined){
-    localStorage["Bible-Search"]=JSON.stringify(db)
+function writeLocalDB(db) {
+  if (localStorage["Bible-Search"] == undefined) {
+    localStorage["Bible-Search"]={}
   }
+  localStorage["Bible-Search"] = JSON.stringify(db);
 }
-function saveToFavorites(book_index,chapter_index,verse_index){
-
-  if(localStorage["Bible-Search"]==undefined){
-    let bd={}
-    bd["favorites_list"][`${book_index}_${chapter_index}_${verse_index}`]={"description":""}
-    writeLocalDB(bd)
-  }else{
-    let bd=readLocalDB()
-    bd["favorites_list"][`${book_index}_${chapter_index}_${verse_index}`]={"description":""}
-    writeLocalDB(bd)
+function saveToFavorites(start_el, book_index, chapter_index, verse_index) {
+  if (localStorage["Bible-Search"] == undefined) {
+    let bd = {"favorites_list":{}};
+    bd["favorites_list"][`${book_index}_${chapter_index}_${verse_index}`] = {
+      description: "",
+    };
+    writeLocalDB(bd);
+  } else {
+    let bd = readLocalDB();
+    bd["favorites_list"][`${book_index}_${chapter_index}_${verse_index}`] = {
+      description: "",
+    };
+    writeLocalDB(bd);
   }
-
+  start_el.innerHTML = "&starf;";
 }
-function removeFromFavorites(book_index,chapter_index,verse_index){
-  let bd=readLocalDB()
-  delete bd["favorites_list"][`${book_index}_${chapter_index}_${verse_index}`]
-  writeLocalDB(bd)
+function removeFromFavorites(book_index, chapter_index, verse_index) {
+  let bd = readLocalDB();
+  delete bd["favorites_list"][`${book_index}_${chapter_index}_${verse_index}`];
+  writeLocalDB(bd);
 }
-function editFavoriteVerseDescription(book_index,chapter_index,verse_index,description){
-  let bd=readLocalDB()
-  bd["favorites_list"][`${book_index}_${chapter_index}_${verse_index}`]["description"]=description
-  writeLocalDB(bd)
+function editFavoriteVerseDescription(
+  book_index,
+  chapter_index,
+  verse_index,
+  description
+) {
+  let bd = readLocalDB();
+  bd["favorites_list"][`${book_index}_${chapter_index}_${verse_index}`][
+    "description"
+  ] = description;
+  writeLocalDB(bd);
 }
 
 //Search functions-----------
