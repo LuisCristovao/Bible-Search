@@ -34,7 +34,7 @@ function chapterHtml(book_index, chapter_index) {
 function verseHtml(book_index, chapter_index, verse_index, verse) {
   return `<p>${verse_index + 1}: ${verse} &nbsp;&nbsp;<a href="?book=${
     book_index + 1
-  };chapter=${chapter_index + 1};verse=${verse_index + 1}">></a></p>`;
+  };chapter=${chapter_index + 1};verse=${verse_index + 1}">></a>&nbsp;&nbsp;<a href="">&starf;</a></p>`;
 }
 function showBibleVerse(book_index = -1, chapter_index = -1, verse_index = -1) {
   let html = "";
