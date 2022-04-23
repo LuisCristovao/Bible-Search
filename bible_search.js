@@ -208,16 +208,11 @@ function removeFromFavorites(book_index, chapter_index, verse_index) {
   delete db["favorites_list"][`${book_index}_${chapter_index}_${verse_index}`];
   writeLocalDB(db);
 }
-function editFavoriteVerseNotes(
-  book_index,
-  chapter_index,
-  verse_index,
-  notes
-) {
+function editFavoriteVerseNotes(book_index, chapter_index, verse_index, notes) {
   let db = readLocalDB();
   db["favorites_list"][`${book_index}_${chapter_index}_${verse_index}`][
     "notes"
-  ] = notes;
+  ] = notes.value;
   writeLocalDB(db);
 }
 function favoriteHiperLink(book_index, chapter_index, verse_index) {
@@ -229,10 +224,19 @@ function favoriteHiperLink(book_index, chapter_index, verse_index) {
   }</a></p>`;
   return html;
 }
+function favoriteNotes(book_index, chapter_index, verse_index, notes) {
+  let html = "";
+  if (notes != "") {
+    html += `<textarea oninput="editFavoriteVerseNotes(${book_index}, ${chapter_index}, ${verse_index}, this)">${notes}</textarea>`;
+  } else {
+    html += `<textarea oninput="editFavoriteVerseNotes(${book_index}, ${chapter_index}, ${verse_index}, this)">notas...</textarea>`;
+  }
+  return html;
+}
 function favoritePage() {
   let html = "";
   let db = readLocalDB();
-  if (db != "" && Object.keys(db["favorites_list"]).length>0) {
+  if (db != "" && Object.keys(db["favorites_list"]).length > 0) {
     let favorites = db["favorites_list"];
     for (key in favorites) {
       let book_index = parseInt(key.split("_")[0]) - 1;
@@ -241,6 +245,7 @@ function favoritePage() {
       let verse = bible_data[book_index].chapters[chapter_index][verse_index];
       html += favoriteHiperLink(book_index, chapter_index, verse_index);
       html += verseHtml(book_index, chapter_index, verse_index, verse);
+      html += favoriteNotes(book_index+1, chapter_index+1, verse_index+1,favorites[key]["notes"]);
     }
     writeHtml(html);
   } else {
