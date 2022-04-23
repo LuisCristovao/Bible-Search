@@ -224,12 +224,8 @@ function favoriteHiperLink(book_index, chapter_index, verse_index) {
   }</a></p>`;
   return html;
 }
-function showNoteButtons(){
-
-}
-function addNotesButton(){
-
-}
+function showNoteButtons() {}
+function addNotesButton() {}
 function favoriteNotes(book_index, chapter_index, verse_index, notes) {
   let html = "";
   if (notes != "") {
@@ -239,49 +235,77 @@ function favoriteNotes(book_index, chapter_index, verse_index, notes) {
   }
   return html;
 }
-function favoriteSearch(search_query){
-  alert("Ola")
-  /* let db = readLocalDB();
+function favoriteSearch(search_query) {
+  console.log("fav search")
+  let html=""
+  let db = readLocalDB();
   if (db != "" && Object.keys(db["favorites_list"]).length > 0) {
     let favorites = db["favorites_list"];
-    for (key in favorites) {
+    let search_favorites = {};
+    search_query
+      .split(" ")
+      .map((word) => removeAccents(word).toLowerCase())
+      .forEach((search_word) => {
+        for (key in favorites) {
+          let book_index = parseInt(key.split("_")[0]) - 1;
+          let chapter_index = parseInt(key.split("_")[1]) - 1;
+          let verse_index = parseInt(key.split("_")[2]) - 1;
+          let verse =bible_data[book_index].chapters[chapter_index][verse_index];
+          let notes=favorites[key]["notes"]
+          if (removeAccents(verse).toLowerCase().includes(search_word) ||removeAccents(notes).toLowerCase().includes(search_word)) {
+            search_favorites[key]=""
+          }
+          
+        }
+      });
+    for (key in search_favorites) {
       let book_index = parseInt(key.split("_")[0]) - 1;
       let chapter_index = parseInt(key.split("_")[1]) - 1;
       let verse_index = parseInt(key.split("_")[2]) - 1;
       let verse = bible_data[book_index].chapters[chapter_index][verse_index];
       html += favoriteHiperLink(book_index, chapter_index, verse_index);
       html += verseHtml(book_index, chapter_index, verse_index, verse);
-      html += favoriteNotes(book_index+1, chapter_index+1, verse_index+1,favorites[key]["notes"]);
+      html += favoriteNotes(
+        book_index + 1,
+        chapter_index + 1,
+        verse_index + 1,
+        favorites[key]["notes"]
+      );
     }
-    writeHtml(html);
+    if(html!=""){
+      writeHtml(html);
+    }else{
+      writeHtml(`<h2>Não encontrou favoritos com pesquisa: ${search_query}</h2>`);
+    }
   } else {
-    writeHtml("<h2>Sem Favoritos</h2>");
-  } */
+    //do nothing...
+    
+  }
 }
-function startFavSearch(e){
+function startFavSearch(e) {
   if (e.key === "Enter") {
     let search = document.getElementById("search").value;
-    favoriteSearch(search)
+    favoriteSearch(search);
     //alert("Enter is pressed!");
   }
 }
 /*
 Using this function because removeEventListener does not work
 */
-function replaceSearchInputElement(){
+function replaceSearchInputElement() {
   let search = document.getElementById("search");
-  let search_parent=search.parentNode
-  search_parent.removeChild(search)
-  let new_search=document.createElement("input")
-  new_search.setAttribute("placeholder","Pesquisar favoritos")
-  new_search.setAttribute("type","text")
-  new_search.setAttribute("id","search")
-  search_parent.appendChild(new_search)
+  let search_parent = search.parentNode;
+  search_parent.removeChild(search);
+  let new_search = document.createElement("input");
+  new_search.setAttribute("placeholder", "Pesquisar favoritos");
+  new_search.setAttribute("type", "text");
+  new_search.setAttribute("id", "search");
+  search_parent.appendChild(new_search);
   new_search.addEventListener("keydown", startFavSearch);
-  return new_search
+  return new_search;
 }
 function favoritePage() {
-  let new_search=replaceSearchInputElement()
+  let new_search = replaceSearchInputElement();
   let html = "";
   let db = readLocalDB();
   if (db != "" && Object.keys(db["favorites_list"]).length > 0) {
@@ -293,7 +317,12 @@ function favoritePage() {
       let verse = bible_data[book_index].chapters[chapter_index][verse_index];
       html += favoriteHiperLink(book_index, chapter_index, verse_index);
       html += verseHtml(book_index, chapter_index, verse_index, verse);
-      html += favoriteNotes(book_index+1, chapter_index+1, verse_index+1,favorites[key]["notes"]);
+      html += favoriteNotes(
+        book_index + 1,
+        chapter_index + 1,
+        verse_index + 1,
+        favorites[key]["notes"]
+      );
     }
     writeHtml(html);
   } else {
