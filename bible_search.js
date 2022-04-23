@@ -178,7 +178,7 @@ function saveToFavorites(start_el, book_index, chapter_index, verse_index) {
   if (localStorage["Bible-Search"] == undefined) {
     let db = { favorites_list: {} };
     db["favorites_list"][`${book_index}_${chapter_index}_${verse_index}`] = {
-      description: "",
+      notes: "",
     };
     writeLocalDB(db);
   } else {
@@ -192,7 +192,7 @@ function saveToFavorites(start_el, book_index, chapter_index, verse_index) {
       start_el.innerHTML = "&star;";
     } else {
       db["favorites_list"][`${book_index}_${chapter_index}_${verse_index}`] = {
-        description: "",
+        notes: "",
       };
       writeLocalDB(db);
       start_el.innerHTML = "&starf;";
@@ -208,19 +208,45 @@ function removeFromFavorites(book_index, chapter_index, verse_index) {
   delete db["favorites_list"][`${book_index}_${chapter_index}_${verse_index}`];
   writeLocalDB(db);
 }
-function editFavoriteVerseDescription(
+function editFavoriteVerseNotes(
   book_index,
   chapter_index,
   verse_index,
-  description
+  notes
 ) {
   let db = readLocalDB();
   db["favorites_list"][`${book_index}_${chapter_index}_${verse_index}`][
-    "description"
-  ] = description;
+    "notes"
+  ] = notes;
   writeLocalDB(db);
 }
-
+function favoriteHiperLink(book_index, chapter_index, verse_index) {
+  let name = bible_data[book_index].name;
+  let html = `<p><a href="?book=${book_index + 1};chapter=${
+    chapter_index + 1
+  };verse=${verse_index + 1}">${name} ${chapter_index + 1}:${
+    verse_index + 1
+  }</a></p>`;
+  return html;
+}
+function favoritePage() {
+  let html = "";
+  let db = readLocalDB();
+  if (db != "" && Object.keys(db["favorites_list"]).length>0) {
+    let favorites = db["favorites_list"];
+    for (key in favorites) {
+      let book_index = parseInt(key.split("_")[0]) - 1;
+      let chapter_index = parseInt(key.split("_")[1]) - 1;
+      let verse_index = parseInt(key.split("_")[2]) - 1;
+      let verse = bible_data[book_index].chapters[chapter_index][verse_index];
+      html += favoriteHiperLink(book_index, chapter_index, verse_index);
+      html += verseHtml(book_index, chapter_index, verse_index, verse);
+    }
+    writeHtml(html);
+  } else {
+    writeHtml("<h2>Sem Favoritos</h2>");
+  }
+}
 //Search functions-----------
 function Match(w1, w2) {
   let w11 = removeAccents(w1).toLowerCase();
@@ -441,34 +467,7 @@ function showChildren(element) {
     child_div.style.display = "none";
   }
 }
-//Favorite Page-----------
-function favoriteHiperLink(book_index, chapter_index, verse_index) {
-  let name = bible_data[book_index].name;
-  let html = `<p><a href="?book=${book_index + 1};chapter=${
-    chapter_index + 1
-  };verse=${verse_index + 1}">${name} ${chapter_index + 1}:${
-    verse_index + 1
-  }</a></p>`;
-  return html;
-}
-function favoritePage() {
-  let html = "";
-  let db = readLocalDB();
-  if (db != "" && Object.keys(db["favorites_list"]).length>0) {
-    let favorites = db["favorites_list"];
-    for (key in favorites) {
-      let book_index = parseInt(key.split("_")[0]) - 1;
-      let chapter_index = parseInt(key.split("_")[1]) - 1;
-      let verse_index = parseInt(key.split("_")[2]) - 1;
-      let verse = bible_data[book_index].chapters[chapter_index][verse_index];
-      html += favoriteHiperLink(book_index, chapter_index, verse_index);
-      html += verseHtml(book_index, chapter_index, verse_index, verse);
-    }
-    writeHtml(html);
-  } else {
-    writeHtml("<h2>Sem Favoritos</h2>");
-  }
-}
+
 //Pages-----
 
 function selectBiBlePart() {
