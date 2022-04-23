@@ -126,6 +126,7 @@ function menu() {
       let html = `
       <a href="?" ><h1 class="menu_class">Inicio</h1></a>
       <a href="?menu=books_menu" ><h1 class="menu_class">Livros</h1></a>
+      <a href="?favorite_page" ><h1 class="menu_class">Favoritos</h1></a>
       `;
       return html;
     },
@@ -434,14 +435,19 @@ function showChildren(element) {
     child_div.style.display = "none";
   }
 }
+//Favorite Page-----------
+function favoritePage(){
+
+}
 //Pages-----
+
 function selectBiBlePart() {
   let data = readQuery();
   showBibleVerse(data.book, data.chapter, data.verse);
 }
 
 async function createHome() {
-  bible_data = await readBiBle();
+  //bible_data = await readBiBle();
   let book_index = getRndInteger(0, bible_data.length);
   let chapter_index = getRndInteger(0, bible_data[book_index].chapters.length);
   let verse_index = getRndInteger(
@@ -476,6 +482,9 @@ const pages = {
   "?menu": () => {
     menu("start menu");
   },
+  "?favorite_page":()=>{
+    favoritePage();
+  }
 };
 const range = (start, stop, step) =>
   Array.from({ length: (stop - start) / step + 1 }, (_, i) => start + i * step);
