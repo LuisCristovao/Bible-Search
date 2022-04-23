@@ -32,22 +32,25 @@ function chapterHtml(book_index, chapter_index) {
 }
 
 function verseHtml(book_index, chapter_index, verse_index, verse) {
-
-  let db=readLocalDB()
-  let star="&star;"
-  if(db!=""){
-    if(getFavoriteVerse(book_index+1, chapter_index+1, verse_index+1)!=undefined){
-      star="&starf;"
+  let db = readLocalDB();
+  let star = "&star;";
+  if (db != "") {
+    if (
+      getFavoriteVerse(book_index + 1, chapter_index + 1, verse_index + 1) !=
+      undefined
+    ) {
+      star = "&starf;";
     }
   }
   return `<p>${verse_index + 1}: ${verse} &nbsp;&nbsp;<a href="?book=${
     book_index + 1
   };chapter=${chapter_index + 1};verse=${
     verse_index + 1
-  }">></a>&nbsp;&nbsp;<a style="cursor:pointer" onclick="saveToFavorites(this,${book_index + 1},${
-    chapter_index + 1
-  },${verse_index + 1})" >${star}</a></p>`;
+  }">></a>&nbsp;&nbsp;<a style="cursor:pointer" onclick="saveToFavorites(this,${
+    book_index + 1
+  },${chapter_index + 1},${verse_index + 1})" >${star}</a></p>`;
 }
+
 function showBibleVerse(book_index = -1, chapter_index = -1, verse_index = -1) {
   let html = "";
   if (book_index == -1) {
@@ -181,8 +184,11 @@ function saveToFavorites(start_el, book_index, chapter_index, verse_index) {
   } else {
     let db = readLocalDB();
     //if already exists on favorites it means he/she wants to remove
-    if (db["favorites_list"][`${book_index}_${chapter_index}_${verse_index}`] !=undefined) {
-      removeFromFavorites(book_index, chapter_index, verse_index)
+    if (
+      db["favorites_list"][`${book_index}_${chapter_index}_${verse_index}`] !=
+      undefined
+    ) {
+      removeFromFavorites(book_index, chapter_index, verse_index);
       start_el.innerHTML = "&star;";
     } else {
       db["favorites_list"][`${book_index}_${chapter_index}_${verse_index}`] = {
@@ -193,9 +199,9 @@ function saveToFavorites(start_el, book_index, chapter_index, verse_index) {
     }
   }
 }
-function getFavoriteVerse(book_index, chapter_index, verse_index){
+function getFavoriteVerse(book_index, chapter_index, verse_index) {
   let db = readLocalDB();
-  return db["favorites_list"][`${book_index}_${chapter_index}_${verse_index}`]
+  return db["favorites_list"][`${book_index}_${chapter_index}_${verse_index}`];
 }
 function removeFromFavorites(book_index, chapter_index, verse_index) {
   let db = readLocalDB();
@@ -436,8 +442,32 @@ function showChildren(element) {
   }
 }
 //Favorite Page-----------
-function favoritePage(){
-
+function favoriteHiperLink(book_index, chapter_index, verse_index) {
+  let name = bible_data[book_index].name;
+  let html = `<p><a href="?book=${book_index + 1};chapter=${
+    chapter_index + 1
+  };verse=${verse_index + 1}">${name} ${chapter_index + 1}:${
+    verse_index + 1
+  }</a></p>`;
+  return html;
+}
+function favoritePage() {
+  let html = "";
+  let db = readLocalDB();
+  if (db != "" && Object.keys(db["favorites_list"]).length>0) {
+    let favorites = db["favorites_list"];
+    for (key in favorites) {
+      let book_index = parseInt(key.split("_")[0]) - 1;
+      let chapter_index = parseInt(key.split("_")[1]) - 1;
+      let verse_index = parseInt(key.split("_")[2]) - 1;
+      let verse = bible_data[book_index].chapters[chapter_index][verse_index];
+      html += favoriteHiperLink(book_index, chapter_index, verse_index);
+      html += verseHtml(book_index, chapter_index, verse_index, verse);
+    }
+    writeHtml(html);
+  } else {
+    writeHtml("<h2>Sem Favoritos</h2>");
+  }
 }
 //Pages-----
 
@@ -482,12 +512,17 @@ const pages = {
   "?menu": () => {
     menu("start menu");
   },
-  "?favorite_page":()=>{
+  "?favorite_page": () => {
     favoritePage();
-  }
+  },
 };
-const range = (start, stop, step) =>
-  Array.from({ length: (stop - start) / step + 1 }, (_, i) => start + i * step);
+const range = (start, stop, step) => {
+  return Array.from(
+    { length: (stop - start) / step + 1 },
+    (_, i) => start + i * step
+  );
+};
+
 window.onload = async () => {
   bible_data = await readBiBle();
   let page = window.location.search.split("=")[0];
