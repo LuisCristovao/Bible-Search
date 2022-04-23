@@ -18,6 +18,7 @@ textarea{
   background-color: black;
   color: rgb(190, 187, 187);
   width: 200px;
+  height: 30px;
   font-size: large;
 }
 h1,
