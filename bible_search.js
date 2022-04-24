@@ -346,6 +346,19 @@ function removeAccents(str) {
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
+function checkIfUserIsLookingUpVerse(search_query){
+  let arr=search_query.split(/\D*\ (\d*)/g,2).map(el=>parseInt(el))
+  for(x in arr){
+    if(x!=NaN){
+      return true
+    }
+  }
+  return false
+}
+function getSearchedBookVerse(search_query){
+  let arr=search_query.split(/(\d*)\:(\d*)/g,3).map(el=>el.trim())
+  alert(arr)
+}
 async function Search() {
   let search_query = removeAccents(
     decodeURI(window.location.search.split("search=")[1])
@@ -353,68 +366,74 @@ async function Search() {
   document.getElementById("search").value = decodeURI(
     window.location.search.split("search=")[1]
   );
-  let matches = [];
-  let book_matches = [];
-  let tmp_match = {};
-  //web workers------------
-  let workers_done = 0;
-  let n_partitions = 5;
-  let n_regists_per_partition = Math.round(bible_data.length / n_partitions);
-  range(0, n_partitions - 1, 1).forEach((index) => {
-    let w = new Worker("./search_worker.js");
-    w.onmessage = (msg) => {
-      console.log("Dados do worker ");
-      matches = matches.concat(msg.data);
-      workers_done += 1;
-    };
-    let start_index = n_regists_per_partition * index;
+  if(checkIfUserIsLookingUpVerse(search_query)){
+    getSearchedBookVerse(search_query)
+  }
+  else{
 
-    w.postMessage({
-      bible_data: bible_data.filter((el, i) => {
-        if (index + 1 == n_partitions) {
-          if (n_regists_per_partition * (index + 1) < bible_data.length) {
-            return (
-              i >= n_regists_per_partition * index && i <= bible_data.length
-            );
+    let matches = [];
+    let book_matches = [];
+    let tmp_match = {};
+    //web workers------------
+    let workers_done = 0;
+    let n_partitions = 5;
+    let n_regists_per_partition = Math.round(bible_data.length / n_partitions);
+    range(0, n_partitions - 1, 1).forEach((index) => {
+      let w = new Worker("./search_worker.js");
+      w.onmessage = (msg) => {
+        console.log("Dados do worker ");
+        matches = matches.concat(msg.data);
+        workers_done += 1;
+      };
+      let start_index = n_regists_per_partition * index;
+  
+      w.postMessage({
+        bible_data: bible_data.filter((el, i) => {
+          if (index + 1 == n_partitions) {
+            if (n_regists_per_partition * (index + 1) < bible_data.length) {
+              return (
+                i >= n_regists_per_partition * index && i <= bible_data.length
+              );
+            } else {
+              return (
+                i >= n_regists_per_partition * index &&
+                i <= n_regists_per_partition * (index + 1)
+              );
+            }
           } else {
             return (
               i >= n_regists_per_partition * index &&
-              i <= n_regists_per_partition * (index + 1)
+              i < n_regists_per_partition * (index + 1)
             );
           }
-        } else {
-          return (
-            i >= n_regists_per_partition * index &&
-            i < n_regists_per_partition * (index + 1)
-          );
-        }
-      }),
-      search_query: search_query,
-      start_index: start_index,
+        }),
+        search_query: search_query,
+        start_index: start_index,
+      });
     });
-  });
-  while (workers_done < n_partitions) {
-    document.getElementById(
-      "content"
-    ).innerHTML = `<h2>Loading...(${workers_done}/${n_partitions})</h2>`;
-    await sleep(300);
+    while (workers_done < n_partitions) {
+      document.getElementById(
+        "content"
+      ).innerHTML = `<h2>Loading...(${workers_done}/${n_partitions})</h2>`;
+      await sleep(300);
+    }
+    matches = matches.sort((a, b) => {
+      if (a.match_score > b.match_score) {
+        return -1;
+      }
+      if (a.match_score < b.match_score) {
+        return 1;
+      }
+  
+      // names must be equal
+      return 0;
+    });
+    //matches=matches.filter((m,i)=>{return i<20})
+    createSearchSugestions(
+      matches,
+      matches.filter((value, index) => index < 10)
+    );
   }
-  matches = matches.sort((a, b) => {
-    if (a.match_score > b.match_score) {
-      return -1;
-    }
-    if (a.match_score < b.match_score) {
-      return 1;
-    }
-
-    // names must be equal
-    return 0;
-  });
-  //matches=matches.filter((m,i)=>{return i<20})
-  createSearchSugestions(
-    matches,
-    matches.filter((value, index) => index < 10)
-  );
 }
 
 function createSearchSugestionsHtml(title, array) {
