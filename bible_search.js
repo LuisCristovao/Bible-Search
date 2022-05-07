@@ -283,11 +283,12 @@ function favoriteSearch(search_query) {
   }
 }
 function startFavSearch(e) {
-  if (e.key === "Enter") {
+  //if (e.key === "Enter" || e.key==="Tab") {
+    
     let search = document.getElementById("search").value;
     favoriteSearch(search);
     //alert("Enter is pressed!");
-  }
+  //}
 }
 /*
 Using this function because removeEventListener does not work
