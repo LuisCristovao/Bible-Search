@@ -236,8 +236,8 @@ function favoriteNotes(book_index, chapter_index, verse_index, notes) {
   return html;
 }
 function favoriteSearch(search_query) {
-  console.log("fav search")
-  let html=""
+  console.log("fav search");
+  let html = "";
   let db = readLocalDB();
   if (db != "" && Object.keys(db["favorites_list"]).length > 0) {
     let favorites = db["favorites_list"];
@@ -250,12 +250,15 @@ function favoriteSearch(search_query) {
           let book_index = parseInt(key.split("_")[0]) - 1;
           let chapter_index = parseInt(key.split("_")[1]) - 1;
           let verse_index = parseInt(key.split("_")[2]) - 1;
-          let verse =bible_data[book_index].chapters[chapter_index][verse_index];
-          let notes=favorites[key]["notes"]
-          if (removeAccents(verse).toLowerCase().includes(search_word) ||removeAccents(notes).toLowerCase().includes(search_word)) {
-            search_favorites[key]=""
+          let verse =
+            bible_data[book_index].chapters[chapter_index][verse_index];
+          let notes = favorites[key]["notes"];
+          if (
+            removeAccents(verse).toLowerCase().includes(search_word) ||
+            removeAccents(notes).toLowerCase().includes(search_word)
+          ) {
+            search_favorites[key] = "";
           }
-          
         }
       });
     for (key in search_favorites) {
@@ -272,22 +275,23 @@ function favoriteSearch(search_query) {
         favorites[key]["notes"]
       );
     }
-    if(html!=""){
+    if (html != "") {
       writeHtml(html);
-    }else{
-      writeHtml(`<h2>Não encontrou favoritos com pesquisa: ${search_query}</h2>`);
+    } else {
+      writeHtml(
+        `<h2>Não encontrou favoritos com pesquisa: ${search_query}</h2>`
+      );
     }
   } else {
     //do nothing...
-    
   }
 }
 function startFavSearch(e) {
   //if (e.key === "Enter" || e.key==="Tab") {
-    
-    let search = document.getElementById("search").value;
-    favoriteSearch(search);
-    //alert("Enter is pressed!");
+
+  let search = document.getElementById("search").value;
+  favoriteSearch(search);
+  //alert("Enter is pressed!");
   //}
 }
 /*
@@ -579,6 +583,30 @@ async function readBiBle() {
   );
   return await data.json();
 }
+function bionicReading() {
+  
+  let paragraphs = Array.from(document.getElementById("content").children).filter(
+    (el) => el.localName == "p"
+  );
+  paragraphs.forEach(p=>{
+    let bionic_text=""
+    let paragraph_text=p.innerHTML.split(" &nbsp;&nbsp;<a")[0]//get only the text from html
+    //split in words paragraph
+    paragraph_text.split(" ").forEach(word=>{
+      let word_length=word.length
+      if(word_length>1){
+        let bionic_word=`<b>${word.substring(0, Math.floor(word.length/2))}</b>${word.substring(Math.floor(word.length/2),word_length)}`
+        bionic_text+=`${bionic_word} `
+      }
+      else{
+        bionic_text+=`<b>${word}</b> `
+      }
+    })
+    p.innerHTML=bionic_text+"&nbsp;&nbsp;<a"+p.innerHTML.split(" &nbsp;&nbsp;<a")[1]
+  })
+  
+
+}
 // Main -----
 const pages = {
   "": () => {
@@ -614,6 +642,8 @@ window.onload = async () => {
   window.onscroll = () => {
     scrollFunction(document.getElementById("scrollTopBtn"));
   };
+  //bionic reading
+  bionicReading();
   //handle footer
   /* if (window.outerHeight >= document.body.offsetHeight) {
     footer.setAttribute(
