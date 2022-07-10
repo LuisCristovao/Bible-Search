@@ -42,6 +42,7 @@ function verseHtml(book_index, chapter_index, verse_index, verse) {
       star = "&starf;";
     }
   }
+  verse=bionicReading(verse)
   return `<p>${verse_index + 1}: ${verse} &nbsp;&nbsp;<a href="?book=${
     book_index + 1
   };chapter=${chapter_index + 1};verse=${
@@ -583,14 +584,9 @@ async function readBiBle() {
   );
   return await data.json();
 }
-function bionicReading() {
+function bionicReading(paragraph_text) {
   
-  let paragraphs = Array.from(document.getElementById("content").children).filter(
-    (el) => el.localName == "p"
-  );
-  paragraphs.forEach(p=>{
     let bionic_text=""
-    let paragraph_text=p.innerHTML.split(" &nbsp;&nbsp;<a")[0]//get only the text from html
     //split in words paragraph
     paragraph_text.split(" ").forEach(word=>{
       let word_length=word.length
@@ -602,8 +598,8 @@ function bionicReading() {
         bionic_text+=`<b>${word}</b> `
       }
     })
-    p.innerHTML=bionic_text+"&nbsp;&nbsp;<a"+p.innerHTML.split(" &nbsp;&nbsp;<a")[1]
-  })
+    return bionic_text
+  
   
 
 }
@@ -643,7 +639,7 @@ window.onload = async () => {
     scrollFunction(document.getElementById("scrollTopBtn"));
   };
   //bionic reading
-  bionicReading();
+  //bionicReading();
   //handle footer
   /* if (window.outerHeight >= document.body.offsetHeight) {
     footer.setAttribute(
