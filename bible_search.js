@@ -599,7 +599,7 @@ function bionicReading(paragraph_text) {
         bionic_text+=`${bionic_word} `
       }
       else{
-        bionic_text+=`<b>${word}</b> `
+        bionic_text+=`<b style="color:rgb(212, 208, 208);">${word}</b> `
       }
     })
     return bionic_text
