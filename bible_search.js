@@ -131,6 +131,7 @@ function menu() {
       <a href="?" ><h1 class="menu_class">Inicio</h1></a>
       <a href="?menu=books_menu" ><h1 class="menu_class">Livros</h1></a>
       <a href="?favorite_page" ><h1 class="menu_class">Favoritos</h1></a>
+      <a href="?settings" ><h1 class="menu_class">Definições</h1></a>
       `;
       return html;
     },
@@ -334,6 +335,9 @@ function favoritePage() {
   } else {
     writeHtml("<h2>Sem Favoritos</h2>");
   }
+}
+function settingsPage(){
+
 }
 //Search functions-----------
 function Match(w1, w2) {
@@ -591,7 +595,7 @@ function bionicReading(paragraph_text) {
     paragraph_text.split(" ").forEach(word=>{
       let word_length=word.length
       if(word_length>1){
-        let bionic_word=`<b style="color:rgb(216, 214, 214);">${word.substring(0, Math.floor(word.length/2))}</b>${word.substring(Math.floor(word.length/2),word_length)}`
+        let bionic_word=`<b style="color:rgb(199, 197, 197);">${word.substring(0, Math.floor(word.length/2))}</b>${word.substring(Math.floor(word.length/2),word_length)}`
         bionic_text+=`${bionic_word} `
       }
       else{
@@ -621,6 +625,9 @@ const pages = {
   "?favorite_page": () => {
     favoritePage();
   },
+  "?settings":()=>{
+    settingsPage()
+  }
 };
 const range = (start, stop, step) => {
   return Array.from(
