@@ -591,7 +591,7 @@ function bionicReading(paragraph_text) {
     paragraph_text.split(" ").forEach(word=>{
       let word_length=word.length
       if(word_length>1){
-        let bionic_word=`<b>${word.substring(0, Math.floor(word.length/2))}</b>${word.substring(Math.floor(word.length/2),word_length)}`
+        let bionic_word=`<b style="color:rgb(216, 214, 214);">${word.substring(0, Math.floor(word.length/2))}</b>${word.substring(Math.floor(word.length/2),word_length)}`
         bionic_text+=`${bionic_word} `
       }
       else{
