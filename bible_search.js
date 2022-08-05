@@ -31,7 +31,7 @@ function chapterHtml(book_index, chapter_index) {
   }"><h2>Capítulo ${chapter_index + 1}</h2></a>`;
 }
 
-function verseHtml(book_index, chapter_index, verse_index, verse) {
+function verseHtml(book_index, chapter_index, verse_index, verse,is_bionic_reading_active=true) {
   let db = readLocalDB();
   let star = "&star;";
   if (db != "") {
@@ -42,7 +42,9 @@ function verseHtml(book_index, chapter_index, verse_index, verse) {
       star = "&starf;";
     }
   }
-  verse=bionicReading(verse)
+  if(is_bionic_reading_active){
+    verse=bionicReading(verse)
+  }
   return `<p>${verse_index + 1}: ${verse} &nbsp;&nbsp;<a href="?book=${
     book_index + 1
   };chapter=${chapter_index + 1};verse=${
@@ -450,7 +452,7 @@ function createSearchSugestionsHtml(title, array) {
         high_light_words: Object.keys(words_to_highlight),
       });
       //html+=chapterHtml(book_index,chapter_index)
-      html += verseHtml(book_index, chapter_index, verse_index, verse);
+      html += verseHtml(book_index, chapter_index, verse_index, verse,false);
     });
     html += `</div>`;
     html += `</div>`;
@@ -516,7 +518,7 @@ function createSearchSugestions(matches, best_matches) {
     });
 
     //html+=chapterHtml(book_index,chapter_index)
-    html += verseHtml(book_index, chapter_index, verse_index, verse);
+    html += verseHtml(book_index, chapter_index, verse_index, verse,false);
   });
   html += "</div>";
   html += "</div>";
