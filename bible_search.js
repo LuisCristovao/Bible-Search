@@ -475,7 +475,7 @@ function syncPage() {
   return html;
 }
 function sendPasswordsEncrypted(conn) {
-  if (localStorage["Bible-Search"].trim() == "") {
+  if (localStorage["Bible-Search"]==undefined || localStorage["Bible-Search"].trim() == "") {
     alert("You have nothing to send!");
   } else {
     conn.send(localStorage["Bible-Search"]);
