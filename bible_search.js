@@ -204,6 +204,7 @@ function saveToFavorites(start_el, book_index, chapter_index, verse_index) {
       notes: "",
     };
     writeLocalDB(db);
+    start_el.innerHTML = "&starf;";
   } else {
     let db = readLocalDB();
     //if already exists on favorites it means he/she wants to remove
