@@ -407,7 +407,7 @@ function connect(peer, host_name) {
       console.log("Received0", data);
       if (data.slice(0, 6).includes("Hello!")) {
         let other_host_name=data.slice(6)
-        createConnectionEstablishedPage(data.slice(6), host_name);
+        createConnectionEstablishedPage(data.slice(6), host_name,conn);
       } else {
         receiveDataPage(data,other_host_name);
       }
