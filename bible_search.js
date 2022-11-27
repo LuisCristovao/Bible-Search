@@ -13,7 +13,17 @@ function scrollFunction(btn) {
     btn.style.display = "none";
   }
 }
-
+const copyToClipboard = (str) => {
+  const el = document.createElement("textarea");
+  el.value = str;
+  el.setAttribute("readonly", "");
+  el.style.position = "absolute";
+  el.style.left = "-9999px";
+  document.body.appendChild(el);
+  el.select();
+  document.execCommand("copy");
+  document.body.removeChild(el);
+};
 function getRndInteger(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
 }
@@ -31,7 +41,13 @@ function chapterHtml(book_index, chapter_index) {
   }"><h2>Capítulo ${chapter_index + 1}</h2></a>`;
 }
 
-function verseHtml(book_index, chapter_index, verse_index, verse,is_bionic_reading_active=true) {
+function verseHtml(
+  book_index,
+  chapter_index,
+  verse_index,
+  verse,
+  is_bionic_reading_active = true
+) {
   let db = readLocalDB();
   let star = "&star;";
   if (db != "") {
@@ -42,8 +58,8 @@ function verseHtml(book_index, chapter_index, verse_index, verse,is_bionic_readi
       star = "&starf;";
     }
   }
-  if(is_bionic_reading_active){
-    verse=bionicReading(verse)
+  if (is_bionic_reading_active) {
+    verse = bionicReading(verse);
   }
   return `<p>${verse_index + 1}: ${verse} &nbsp;&nbsp;<a href="?book=${
     book_index + 1
@@ -167,7 +183,10 @@ function menu() {
 
 //Favorites-----
 function readLocalDB() {
-  if (localStorage["Bible-Search"] == undefined) {
+  if (
+    localStorage["Bible-Search"] == undefined ||
+    localStorage["Bible-Search"].trim() == ""
+  ) {
     return "";
   }
   return JSON.parse(localStorage["Bible-Search"]);
@@ -338,8 +357,171 @@ function favoritePage() {
     writeHtml("<h2>Sem Favoritos</h2>");
   }
 }
-function settingsPage(){
+function exportFav(btn) {
+  let old_text = btn.innerText;
+  btn.innerText = "Favoritos Copiados!";
+  copyToClipboard(localStorage["Bible-Search"]);
+  setTimeout(() => {
+    btn.innerText = old_text;
+  }, 1000);
+}
+function importFav(btn) {
+  let old_text = btn.innerText;
+  btn.innerText = "Favoritos Importados com Sucesso!";
+  localStorage["Bible-Search"] =
+    document.getElementsByTagName("textarea")[0].value;
+  setTimeout(() => {
+    btn.innerText = old_text;
+  }, 1000);
+}
+function RandomPassSync(size) {
+  var text = "";
+  var possible =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
+  for (var i = 0; i < size; i++) {
+    text += possible.charAt(Math.floor(Math.random() * possible.length));
+  }
+
+  return text;
+}
+function shareConnectionUrl(btn) {
+  let peer_id = btn.getAttribute("peer_id");
+  if (peer_id != null) {
+    copyToClipboard(window.location.origin + "/Bible-Search/?Connect::" + peer_id);
+    let old_text = btn.innerText;
+    btn.innerText = "Copied Link!";
+    setTimeout(() => {
+      btn.innerText = old_text;
+    }, 1000);
+  }
+}
+function connect(peer, host_name) {
+  //host that initiates invitation for connection
+  conn = peer.connect(window.location.search.split("::")[1]);
+
+  conn.on("open", function () {
+    // Receive messages
+    conn.on("data", function (data) {
+      console.log("Received0", data);
+      if (data.slice(0, 6).includes("Hello!")) {
+        let other_host_name=data.slice(6)
+        createConnectionEstablishedPage(data.slice(6), host_name);
+      } else {
+        receiveDataPage(data,other_host_name);
+      }
+    });
+    // Send messages
+    conn.send(`Hello!${host_name}`);
+  });
+}
+function syncPage() {
+  var peer_id = null;
+  const host_name = RandomPassSync(5);
+  var other_host_name = null;
+  var peer = new Peer();
+  var conn = null;
+  let html = "";
+  html += `<h3>You host name is: ${host_name}</h3><br>`;
+  html += `<h3>Read QR Code to connect</h3><br>`;
+  html += `<img><br>`;
+  html += `<button style="font-size:large" onclick="shareConnectionUrl(this)">Share Connection Url</button>`;
+
+  // first host to receive connection
+  peer.on("open", function (id) {
+    peer_id = id;
+    document.getElementsByTagName("button")[0].setAttribute("peer_id", peer_id);
+    console.log("My peer ID is: " + id);
+    document
+      .getElementsByTagName("img")[0]
+      .setAttribute(
+        "src",
+        "https://api.qrserver.com/v1/create-qr-code/?data=" +
+          window.location.origin +
+          "/Bible-Search/?Connect::" +
+          id +
+          "&amp;size=100x100"
+      );
+  });
+  //on connection
+  peer.on("connection", function (_conn) {
+    console.log("connected with " + _conn.peer);
+    connection_established = true;
+    // Send messages
+    conn = _conn;
+
+    setTimeout(() => {
+      conn.send(`Hello!${host_name}`);
+    }, 200);
+
+    conn.on("data", (data) => {
+      console.log("Received3: ", data);
+      if (data.slice(0, 6).includes("Hello!")) {
+        other_host_name=data.slice(6)
+        createConnectionEstablishedPage(data.slice(6), host_name,conn);
+      } else {
+        receiveDataPage(data, other_host_name);
+      }
+    });
+  });
+
+  if (window.location.search.split("::")[1] != undefined) {
+    //wait to load page until try first connect
+    setTimeout(() => {
+      connect(peer, host_name);
+    }, 500);
+  }
+
+  return html;
+}
+function sendPasswordsEncrypted(conn) {
+  if (localStorage["Bible-Search"].trim() == "") {
+    alert("You have nothing to send!");
+  } else {
+    conn.send(localStorage["Bible-Search"]);
+  }
+}
+function createConnectionEstablishedPage(_other_host_name, host_name,conn) {
+  other_host_name = _other_host_name;
+  let html = `<h3>You host name is: ${host_name}</h3><br>`;
+  html += `<button style="font-size:large" >Send Data to ${other_host_name}</button>`;
+  writeHtml(html);
+  setTimeout(()=>{
+    document.getElementsByTagName("button")[0].addEventListener("click",()=>{sendPasswordsEncrypted(conn)})
+  },300)
+}
+function receiveDataPage(data, other_host_name) {
+  let html = `<h3>Receiving data from host : ${other_host_name}</h3><br>`;
+  html += `<textarea style="width:250px;height:300px">${data}</textarea><br>`;
+  html += `<button style="font-size:large" onclick='importFav(this)'>Importar Favoritos</button>`;
+
+  // html += `<button style="font-size:large" onclick='alert("Sending data")'>Cancel</button>`;
+  writeHtml(html);
+}
+function settingsPage() {
+  //document.body.innerHTML=""
+  let state = null;
+  try {
+    state = window.location.search.split("settings=")[1];
+  } catch {
+    state = "";
+  }
+
+  let html = `<h1 align="center" onclick="exportFav(this)" style="text-decoration:underline rgb(5, 134, 167);cursor:pointer">Exportar Favoritos</h1>`;
+  html += `<a href="${window.location.origin}/Bible-Search/?settings=import" align="center" ><h1>Importar Favoritos</h1></a>`;
+  html += `<a href="${window.location.origin}/Bible-Search/?settings=sync" align="center" ><h1>Sincronizar Favoritos</h1></a>`;
+
+  if (state === "import") {
+    html = `<div align="center">`;
+    html += `<textarea placeholder="Colocar Json aqui!" style="width:300px;height:300px"> </textarea><br>`;
+    html += `<button onclick="importFav(this)">Importar</button>`;
+    html += `</div>`;
+  }
+  if (state === "sync") {
+    html = syncPage();
+  }
+
+  writeHtml(html);
 }
 //Search functions-----------
 function Match(w1, w2) {
@@ -452,7 +634,7 @@ function createSearchSugestionsHtml(title, array) {
         high_light_words: Object.keys(words_to_highlight),
       });
       //html+=chapterHtml(book_index,chapter_index)
-      html += verseHtml(book_index, chapter_index, verse_index, verse,false);
+      html += verseHtml(book_index, chapter_index, verse_index, verse, false);
     });
     html += `</div>`;
     html += `</div>`;
@@ -518,7 +700,7 @@ function createSearchSugestions(matches, best_matches) {
     });
 
     //html+=chapterHtml(book_index,chapter_index)
-    html += verseHtml(book_index, chapter_index, verse_index, verse,false);
+    html += verseHtml(book_index, chapter_index, verse_index, verse, false);
   });
   html += "</div>";
   html += "</div>";
@@ -591,23 +773,21 @@ async function readBiBle() {
   return await data.json();
 }
 function bionicReading(paragraph_text) {
-  
-    let bionic_text=""
-    //split in words paragraph
-    paragraph_text.split(" ").forEach(word=>{
-      let word_length=word.length
-      if(word_length>1){
-        let bionic_word=`<b style="color:rgb(212, 208, 208);">${word.substring(0, Math.floor(word.length/2))}</b>${word.substring(Math.floor(word.length/2),word_length)}`
-        bionic_text+=`${bionic_word} `
-      }
-      else{
-        bionic_text+=`<b style="color:rgb(212, 208, 208);">${word}</b> `
-      }
-    })
-    return bionic_text
-  
-  
-
+  let bionic_text = "";
+  //split in words paragraph
+  paragraph_text.split(" ").forEach((word) => {
+    let word_length = word.length;
+    if (word_length > 1) {
+      let bionic_word = `<b style="color:rgb(212, 208, 208);">${word.substring(
+        0,
+        Math.floor(word.length / 2)
+      )}</b>${word.substring(Math.floor(word.length / 2), word_length)}`;
+      bionic_text += `${bionic_word} `;
+    } else {
+      bionic_text += `<b style="color:rgb(212, 208, 208);">${word}</b> `;
+    }
+  });
+  return bionic_text;
 }
 // Main -----
 const pages = {
@@ -627,9 +807,9 @@ const pages = {
   "?favorite_page": () => {
     favoritePage();
   },
-  "?settings":()=>{
-    settingsPage()
-  }
+  "?settings": () => {
+    settingsPage();
+  },
 };
 const range = (start, stop, step) => {
   return Array.from(
@@ -643,7 +823,11 @@ window.onload = async () => {
   let page = window.location.search.split("=")[0];
   let search = document.getElementById("search");
   search.addEventListener("keydown", startSearch);
-  pages[page]();
+  if (page.includes("?Connect")) {
+    writeHtml(syncPage());
+  } else {
+    pages[page]();
+  }
   window.onscroll = () => {
     scrollFunction(document.getElementById("scrollTopBtn"));
   };
