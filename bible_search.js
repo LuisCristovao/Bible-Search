@@ -413,7 +413,10 @@ function connect(peer, host_name) {
       }
     });
     // Send messages
-    conn.send(`Hello!${host_name}`);
+    setTimeout(()=>{
+      conn.send(`Hello!${host_name}`);
+    },200)
+    
   });
 }
 function syncPage() {
