@@ -31,14 +31,12 @@ function writeHtml(html) {
   document.getElementById("content").innerHTML = html;
 }
 function bookHtml(book_index, book) {
-  return `<a href="?menu=book_menu;${book_index + 1}"><h1>Livro ${
-    book_index + 1
-  } ${book.name}</h1></a>`;
+  return `<a href="?menu=book_menu;${book_index + 1}"><h1>Livro ${book_index + 1
+    } ${book.name}</h1></a>`;
 }
 function chapterHtml(book_index, chapter_index) {
-  return `<a href="?book=${book_index + 1};chapter=${
-    chapter_index + 1
-  }"><h2>Capítulo ${chapter_index + 1}</h2></a>`;
+  return `<a href="?book=${book_index + 1};chapter=${chapter_index + 1
+    }"><h2>Capítulo ${chapter_index + 1}</h2></a>`;
 }
 
 function verseHtml(
@@ -61,13 +59,10 @@ function verseHtml(
   if (is_bionic_reading_active) {
     verse = bionicReading(verse);
   }
-  return `<p>${verse_index + 1}: ${verse} &nbsp;&nbsp;<a href="?book=${
-    book_index + 1
-  };chapter=${chapter_index + 1};verse=${
-    verse_index + 1
-  }">></a>&nbsp;&nbsp;<a style="cursor:pointer" onclick="saveToFavorites(this,${
-    book_index + 1
-  },${chapter_index + 1},${verse_index + 1})" >${star}</a></p>`;
+  return `<p>${verse_index + 1}: ${verse} &nbsp;&nbsp;<a href="?book=${book_index + 1
+    };chapter=${chapter_index + 1};verse=${verse_index + 1
+    }">></a>&nbsp;&nbsp;<a style="cursor:pointer" onclick="saveToFavorites(this,${book_index + 1
+    },${chapter_index + 1},${verse_index + 1})" >${star}</a></p>`;
 }
 
 function showBibleVerse(book_index = -1, chapter_index = -1, verse_index = -1) {
@@ -170,9 +165,8 @@ function menu() {
       let html = `<h1>${book.name}</h1>`;
       book.chapters.forEach((chapter, chapter_index) => {
         html += `
-        <a href="?book=${book_index + 1};chapter=${
-          chapter_index + 1
-        }" style="font-size:x-large;padding:3px">${chapter_index + 1}</a>
+        <a href="?book=${book_index + 1};chapter=${chapter_index + 1
+          }" style="font-size:x-large;padding:3px">${chapter_index + 1}</a>
         `;
       });
       return html;
@@ -241,15 +235,13 @@ function editFavoriteVerseNotes(book_index, chapter_index, verse_index, notes) {
 }
 function favoriteHiperLink(book_index, chapter_index, verse_index) {
   let name = bible_data[book_index].name;
-  let html = `<p><a href="?book=${book_index + 1};chapter=${
-    chapter_index + 1
-  };verse=${verse_index + 1}">${name} ${chapter_index + 1}:${
-    verse_index + 1
-  }</a></p>`;
+  let html = `<p><a href="?book=${book_index + 1};chapter=${chapter_index + 1
+    };verse=${verse_index + 1}">${name} ${chapter_index + 1}:${verse_index + 1
+    }</a></p>`;
   return html;
 }
-function showNoteButtons() {}
-function addNotesButton() {}
+function showNoteButtons() { }
+function addNotesButton() { }
 function favoriteNotes(book_index, chapter_index, verse_index, notes) {
   let html = "";
   if (notes != "") {
@@ -397,30 +389,34 @@ function shareConnectionUrl(btn) {
     }, 1000);
   }
 }
-function connect(peer, host_name) {
+function connect(peer, host_name,receive_info,ms=1000) {
   //host that initiates invitation for connection
   conn = peer.connect(window.location.search.split("::")[1]);
-
+  
   conn.on("open", function () {
     // Receive messages
     conn.on("data", function (data) {
       console.log("Received0", data);
+      receive_info=true
+      conn.send(`Hello!${host_name}`)
       if (data.slice(0, 6).includes("Hello!")) {
-        let other_host_name=data.slice(6)
-        createConnectionEstablishedPage(data.slice(6), host_name,conn);
+        createConnectionEstablishedPage(data.slice(6), host_name, conn);
       } else {
-        receiveDataPage(data,other_host_name);
+        receiveDataPage(data, other_host_name);
       }
     });
-    // Send messages
-    setTimeout(()=>{
-      conn.send(`Hello!${host_name}`);
-    },200)
-    
   });
+
+  //try to connect on fail
+  setTimeout(() => {
+    if (!receive_info) {
+      connect(peer,host_name,receive_info, ms + 500)
+    }
+  }, ms)
 }
 function syncPage() {
   var peer_id = null;
+  var receive_info=false;
   const host_name = RandomPassSync(5);
   var other_host_name = null;
   var peer = new Peer();
@@ -441,10 +437,10 @@ function syncPage() {
       .setAttribute(
         "src",
         "https://api.qrserver.com/v1/create-qr-code/?data=" +
-          window.location.origin +
-          "/Bible-Search/?Connect::" +
-          id +
-          "&amp;size=100x100"
+        window.location.origin +
+        "/Bible-Search/?Connect::" +
+        id +
+        "&amp;size=100x100"
       );
   });
   //on connection
@@ -456,13 +452,13 @@ function syncPage() {
 
     setTimeout(() => {
       conn.send(`Hello!${host_name}`);
-    }, 200);
+    }, 300);
 
     conn.on("data", (data) => {
       console.log("Received3: ", data);
       if (data.slice(0, 6).includes("Hello!")) {
-        other_host_name=data.slice(6)
-        createConnectionEstablishedPage(data.slice(6), host_name,conn);
+        other_host_name = data.slice(6)
+        createConnectionEstablishedPage(data.slice(6), host_name, conn);
       } else {
         receiveDataPage(data, other_host_name);
       }
@@ -470,29 +466,26 @@ function syncPage() {
   });
 
   if (window.location.search.split("::")[1] != undefined) {
-    //wait to load page until try first connect
-    setTimeout(() => {
-      connect(peer, host_name);
-    }, 500);
+    connect(peer, host_name,receive_info);
   }
 
   return html;
 }
 function sendPasswordsEncrypted(conn) {
-  if (localStorage["Bible-Search"]==undefined || localStorage["Bible-Search"].trim() == "") {
+  if (localStorage["Bible-Search"] == undefined || localStorage["Bible-Search"].trim() == "") {
     alert("You have nothing to send!");
   } else {
     conn.send(localStorage["Bible-Search"]);
   }
 }
-function createConnectionEstablishedPage(_other_host_name, host_name,conn) {
+function createConnectionEstablishedPage(_other_host_name, host_name, conn) {
   other_host_name = _other_host_name;
   let html = `<h3>You host name is: ${host_name}</h3><br>`;
   html += `<button style="font-size:large" >Send Data to ${other_host_name}</button>`;
   writeHtml(html);
-  setTimeout(()=>{
-    document.getElementsByTagName("button")[0].addEventListener("click",()=>{sendPasswordsEncrypted(conn)})
-  },300)
+  setTimeout(() => {
+    document.getElementsByTagName("button")[0].addEventListener("click", () => { sendPasswordsEncrypted(conn) })
+  }, 300)
 }
 function receiveDataPage(data, other_host_name) {
   let html = `<h3>Receiving data from host : ${other_host_name}</h3><br>`;
