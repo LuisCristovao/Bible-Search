@@ -53,7 +53,7 @@ function chapterHtml(book_index, chapter_index) {
 function speakBible(self){
   if(self.innerText=="| Ouvir"){
     
-    let verses=Array.from(document.getElementsByTagName("p")).map(el=>el.innerText)
+    let verses=Array.from(document.getElementsByTagName("p")).map(el=>el.innerText.replaceAll(">",""))
     verses.forEach((verse)=>{
       var msg = new SpeechSynthesisUtterance();
       msg.lang="pt"
