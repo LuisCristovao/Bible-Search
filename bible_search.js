@@ -54,11 +54,14 @@ function speakBible(self){
   if(self.innerText=="| Ouvir"){
     
     let verses=Array.from(document.getElementsByTagName("p")).map(el=>el.innerText)
-    verses.forEach(verse=>{
+    verses.forEach((verse,index)=>{
       var msg = new SpeechSynthesisUtterance();
       msg.lang="pt"
       msg.text=verse
       speechSynthesis.speak(msg);
+      if(index==verses.length-1){
+        setTimeout(()=>{self.innerText="| Ouvir"},1000)
+      }
     })
     self.innerText="| Parar de Ouvir"
   }else{
