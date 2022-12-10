@@ -35,10 +35,37 @@ function bookHtml(book_index, book) {
     } ${book.name}</h1></a>`;
 }
 function chapterHtml(book_index, chapter_index) {
-  return `<a href="?book=${book_index + 1};chapter=${chapter_index + 1
-    }"><h2>Capítulo ${chapter_index + 1}</h2></a>`;
+  return `<table>
+  <tbody>
+  <tr>
+  <td>
+  <a href="?book=${book_index + 1};chapter=${chapter_index + 1
+    }"><h2>Capítulo ${chapter_index + 1} </h2></a>
+  </td>
+  <td>
+  <h2 onclick="speakBible(this)" style="padding-left:5px;cursor:pointer">| Ouvir</h2>
+  </td>
+  </tr>
+  </tbody>
+  </table>  
+    `;
 }
-
+function speakBible(self){
+  if(self.innerText=="| Ouvir"){
+    
+    let verses=Array.from(document.getElementsByTagName("p")).map(el=>el.innerText)
+    verses.forEach(verse=>{
+      var msg = new SpeechSynthesisUtterance();
+      msg.lang="pt"
+      msg.text=verse
+      speechSynthesis.speak(msg);
+    })
+    self.innerText="| Parar de Ouvir"
+  }else{
+    speechSynthesis.cancel()
+    self.innerText="| Ouvir"
+  }
+}
 function verseHtml(
   book_index,
   chapter_index,
