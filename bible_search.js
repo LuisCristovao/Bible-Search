@@ -794,6 +794,10 @@ async function readBiBle() {
   let data = await fetch(
     "https://raw.githubusercontent.com/thiagobodruk/bible/master/json/pt_aa.json"
   );
+  //english
+  /*let data = await fetch(
+    "https://raw.githubusercontent.com/thiagobodruk/bible/master/json/en_bbe.json"
+  );*/
   return await data.json();
 }
 function bionicReading(paragraph_text) {
