@@ -50,20 +50,22 @@ function chapterHtml(book_index, chapter_index) {
   </table>  
     `;
 }
-function speakBible(self){
-  if(self.innerText=="| Ouvir"){
-    
-    let verses=Array.from(document.getElementsByTagName("p")).map(el=>el.innerText.replaceAll(">",""))
-    verses.forEach((verse)=>{
+function speakBible(self) {
+  if (self.innerText == "| Ouvir") {
+
+    let verses = Array.from(document.getElementsByTagName("p")).map(el => el.innerText.replaceAll(">", ""))
+    verses.forEach((verse) => {
       var msg = new SpeechSynthesisUtterance();
-      msg.lang="pt"
-      msg.text=verse
+      msg.lang = "pt"
+      msg.text = verse
       speechSynthesis.speak(msg);
     })
-    self.innerText="| Parar de Ouvir"
-  }else{
+    self.innerText = "| Parar de Ouvir"
+    //stop screen from hibernating
+    navigator.wakeLock.request('screen');
+  } else {
     speechSynthesis.cancel()
-    self.innerText="| Ouvir"
+    self.innerText = "| Ouvir"
   }
 }
 function verseHtml(
@@ -416,15 +418,15 @@ function shareConnectionUrl(btn) {
     }, 1000);
   }
 }
-function connect(peer, host_name,receive_info,ms=1000) {
+function connect(peer, host_name, receive_info, ms = 1000) {
   //host that initiates invitation for connection
   conn = peer.connect(window.location.search.split("::")[1]);
-  
+
   conn.on("open", function () {
     // Receive messages
     conn.on("data", function (data) {
       console.log("Received0", data);
-      receive_info=true
+      receive_info = true
       conn.send(`Hello!${host_name}`)
       if (data.slice(0, 6).includes("Hello!")) {
         createConnectionEstablishedPage(data.slice(6), host_name, conn);
@@ -437,13 +439,13 @@ function connect(peer, host_name,receive_info,ms=1000) {
   //try to connect on fail
   setTimeout(() => {
     if (!receive_info) {
-      connect(peer,host_name,receive_info, ms + 500)
+      connect(peer, host_name, receive_info, ms + 500)
     }
   }, ms)
 }
 function syncPage() {
   var peer_id = null;
-  var receive_info=false;
+  var receive_info = false;
   const host_name = RandomPassSync(5);
   var other_host_name = null;
   var peer = new Peer();
@@ -493,7 +495,7 @@ function syncPage() {
   });
 
   if (window.location.search.split("::")[1] != undefined) {
-    connect(peer, host_name,receive_info);
+    connect(peer, host_name, receive_info);
   }
 
   return html;
