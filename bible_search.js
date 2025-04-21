@@ -192,12 +192,14 @@ function menu() {
         parseInt(window.location.search.split("book_menu;")[1]) - 1;
       let book = bible_data[book_index];
       let html = `<h1>${book.name}</h1>`;
+      html+="<div>"
       book.chapters.forEach((chapter, chapter_index) => {
         html += `
         <a href="?book=${book_index + 1};chapter=${chapter_index + 1
           }" style="font-size:x-large;padding:3px">${chapter_index + 1}</a>
         `;
       });
+      html+="</div>"
       return html;
     },
   };
