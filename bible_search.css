@@ -1,6 +1,14 @@
 html{
     scroll-behavior: smooth;
 }
+#top_menu {
+  display: flex;
+  flex-direction: column;
+  
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto; /* this is what centers it */
+}
 
 #search {
   font-size: large;
@@ -66,10 +74,16 @@ input {
   background-color: rgb(85,85,85,0.4);
 }
 
-/*#content{
-    text-align: center;
+#content{
+    display: flex;
+    flex-direction: column;
+   
+    max-width: 600px; /* or any width you prefer */
+    width: 100%;
+    margin: 0 auto;   /* centers the div horizontally */
+   
     
-}*/
+}
 
 /*.partial-window {
     text-decoration: underline;
