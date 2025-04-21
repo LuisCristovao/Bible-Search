@@ -578,7 +578,7 @@ async function Search() {
   let tmp_match = {};
   //web workers------------
   let workers_done = 0;
-  let n_partitions = 5;
+  let n_partitions = navigator.hardwareConcurrency || 5;
   let n_regists_per_partition = Math.round(bible_data.length / n_partitions);
   range(0, n_partitions - 1, 1).forEach((index) => {
     let w = new Worker("./search_worker.js");
